@@ -1,9 +1,9 @@
 {
-  "name": "before-after-dashboard-justina",
+  "name": "consult-dashboard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 3006",
+    "dev": "next dev --turbopack -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
