@@ -1,12 +1,20 @@
 "use client";
 
+import { useGetSingleUserQuery } from "@/redux/api/userApi";
 import { Modal } from "antd";
 import Image from "next/image";
 
-export default function ProfileModal({ open, setOpen, role }) {
+export default function ProfileModal({ open, setOpen, role, selectedUser }) {
   const handleCancel = () => {
     setOpen(false);
   };
+
+  // get single user info
+
+  const { data: user } = useGetSingleUserQuery(selectedUser?.id, {
+    skip: !selectedUser?.id,
+  });
+  console.log("🚀 ~ ProfileModal ~ user:", user);
 
   // Consultant view component
   const ConsultantView = () => (
@@ -21,7 +29,7 @@ export default function ProfileModal({ open, setOpen, role }) {
         <div className="relative mx-auto mb-4 h-24 w-24">
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#D83578] to-[#962E84] blur-md" />
           <Image
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop"
+            src={selectedUser?.userImg}
             alt="Profile"
             width={96}
             height={96}
@@ -31,10 +39,10 @@ export default function ProfileModal({ open, setOpen, role }) {
 
         {/* Name */}
         <h2 className="text-center text-2xl font-bold text-white">
-          Kristy Campbell
+          {selectedUser?.name}
         </h2>
         <p className="text-center text-sm text-gray-100">
-          Property Investor at Pinkpony
+          {selectedUser?.role}
         </p>
       </div>
 
@@ -43,11 +51,15 @@ export default function ProfileModal({ open, setOpen, role }) {
         {/* Following and Followers */}
         <div className="flex gap-8 text-center">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">187</h3>
+            <h3 className="text-2xl font-bold text-gray-900">
+              {selectedUser?.following}
+            </h3>
             <p className="text-sm text-gray-500">Following</p>
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">17k</h3>
+            <h3 className="text-2xl font-bold text-gray-900">
+              {selectedUser?.followers}
+            </h3>
             <p className="text-sm text-gray-500">Followers</p>
           </div>
         </div>
@@ -80,7 +92,9 @@ export default function ProfileModal({ open, setOpen, role }) {
                   Consultz Points
                 </p>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900">526</h4>
+              <h4 className="text-2xl font-bold text-gray-900">
+                {selectedUser?.points}
+              </h4>
             </div>
 
             {/* Av. star rating */}
@@ -99,7 +113,9 @@ export default function ProfileModal({ open, setOpen, role }) {
                   Av. star rating
                 </p>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900">4.9</h4>
+              <h4 className="text-2xl font-bold text-gray-900">
+                {selectedUser?.avgRating}
+              </h4>
             </div>
 
             {/* Av. attendance */}
@@ -147,7 +163,7 @@ export default function ProfileModal({ open, setOpen, role }) {
           <div className="mb-2 flex items-center justify-between">
             <h4 className="font-bold text-gray-900">Key expertise</h4>
             <a href="#" className="text-sm text-blue-600 hover:text-blue-700">
-              Finance
+              {selectedUser?.expertise}
             </a>
           </div>
         </div>
@@ -171,12 +187,14 @@ export default function ProfileModal({ open, setOpen, role }) {
         <div>
           <h4 className="mb-2 font-bold text-gray-900">Skills</h4>
           <div className="flex gap-2">
-            <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
-              Procurement
-            </span>
-            <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
-              Sales
-            </span>
+            {selectedUser?.skills?.map((skill, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700"
+              >
+                {skill}
+              </span>
+            ))}
           </div>
         </div>
       </div>
@@ -193,7 +211,7 @@ export default function ProfileModal({ open, setOpen, role }) {
         <div className="relative mx-auto mb-4 h-24 w-24">
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#D83578] to-[#962E84] blur-md" />
           <Image
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop"
+            src={selectedUser?.userImg}
             alt="Profile"
             width={96}
             height={96}
@@ -202,7 +220,7 @@ export default function ProfileModal({ open, setOpen, role }) {
         </div>
 
         <h2 className="text-center text-2xl font-bold text-white">
-          Justina Ojayluv
+          {selectedUser?.name}
         </h2>
       </div>
 
@@ -374,7 +392,7 @@ export default function ProfileModal({ open, setOpen, role }) {
       width={700}
     >
       <div className="overflow-hidden rounded-2xl">
-        {role === "Consultant" ? <ConsultantView /> : <UserView />}
+        {role === "expert" ? <ConsultantView /> : <UserView />}
       </div>
     </Modal>
   );

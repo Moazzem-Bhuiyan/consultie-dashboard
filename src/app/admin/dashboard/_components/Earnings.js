@@ -1,6 +1,6 @@
 "use client";
 
-import { Select } from "antd";
+import { DatePicker } from "antd";
 import {
   BarChart,
   Bar,
@@ -12,27 +12,20 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useState } from "react";
+import moment from "moment";
 
-const data = [
-  { month: "Jan", earning: 120, commission: 10 },
-  { month: "Feb", earning: 140, commission: 25 },
-  { month: "Mar", earning: 150, commission: 10 },
-  { month: "Apr", earning: 120, commission: 65 },
-  { month: "May", earning: 153, commission: 10 },
-  { month: "Jun", earning: 164, commission: 75 },
-  { month: "Jul", earning: 193, commission: 15 },
-  { month: "Aug", earning: 134, commission: 90 },
-  { month: "Sep", earning: 184, commission: 15 },
-  { month: "Oct", earning: 126, commission: 21 },
-  { month: "Nov", earning: 164, commission: 15 },
-  { month: "Dec", earning: 110, commission: 60 },
-];
+const EarningSummary = ({ revenueVsCommission, onYearChange }) => {
+  const [selectedYear, setSelectedYear] = useState(null);
 
-const EarningSummary = () => {
-  const [selectedYear, setSelectedYear] = useState("2024");
-
-  const handleChange = (value) => {
-    setSelectedYear(value);
+  const data = revenueVsCommission?.map((item, index) => ({
+    month: item.month,
+    earning: item?.revenue,
+    commission: item?.commission,
+  }));
+  const handleChange = (date, dateString) => {
+    // Date string will contain the selected year
+    setSelectedYear(dateString); // DatePicker returns the year in 'YYYY' format
+    onYearChange(dateString);
   };
 
   return (
@@ -41,16 +34,12 @@ const EarningSummary = () => {
         <h1 className="text-xl font-bold">Revenue vs Commission</h1>
 
         <div className="space-x-3">
-          <Select
-            value={selectedYear}
-            style={{ width: 120 }}
+          <DatePicker
+            value={selectedYear ? moment(selectedYear, "YYYY") : null}
             onChange={handleChange}
-            options={[
-              { value: "2024", label: "2024" },
-              { value: "2023", label: "2023" },
-              { value: "2022", label: "2022" },
-              { value: "2021", label: "2021" },
-            ]}
+            picker="year"
+            placeholder="Select Year"
+            style={{ width: 120 }}
           />
         </div>
       </div>

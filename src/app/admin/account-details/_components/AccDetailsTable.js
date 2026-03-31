@@ -2,8 +2,8 @@
 import { Input, Table, Tag } from "antd";
 import { Tooltip } from "antd";
 import { ConfigProvider } from "antd";
-import { FilterIcon, Search } from "lucide-react";
-import userImage from "@/assets/images/user-avatar-lg.png";
+import { Filter, FilterIcon, Search } from "lucide-react";
+import userImage from "@/assets/images/nouser.png";
 import { Eye } from "lucide-react";
 import { UserX } from "lucide-react";
 import { CheckCircle } from "lucide-react";
@@ -12,37 +12,79 @@ import Image from "next/image";
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
 import { message } from "antd";
 import ProfileModal from "@/components/SharedModals/ProfileModal";
-// import BussinessProfileModal from "@/components/SharedModals/BussinessProfileModal";
+import {
+  useChangeUserStatusMutation,
+  useGetAllusersQuery,
+} from "@/redux/api/userApi";
+import toast from "react-hot-toast";
 
 export default function BussinessAccDetailsTable({ limit }) {
+  const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [role, setRole] = useState(null);
-  // Updated dummy table Data with different statuses
-  const data = Array.from({ length: limit || 10 }).map((_, inx) => {
-    const statuses = ["pending", "active", "blocked"];
-    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-
+  const [selectedUser, SetSelecteduser] = useState("");
+  // User data with query parameterss
+  const { data: users, isLoading } = useGetAllusersQuery({
+    limit: 10,
+    page: currentPage,
+    searchText,
+  });
+  const data = users?.data?.userList?.map((user, inx) => {
     return {
-      key: inx + 1,
-      name: "Moazzem Hossain",
-      userImg: userImage,
-      email: "moazzem@gmail.com",
-      contact: "+1234567890",
-      date: "11 oct 24, 11.10PM",
-      status: randomStatus,
-      userType: inx % 2 === 0 ? "Consultant" : "User",
+      key: user?._id || inx + 1,
+      id: user?._id,
+      // Full Name
+      name: `${user?.firstName || ""} ${user?.lastName || ""}`,
+
+      // Image
+      userImg: user?.photoUrl || userImage, // fallback image
+
+      // Basic Info
+      email: user?.email || "N/A",
+      contact: user?.phoneNumber || "N/A",
+
+      // Date (Formatted)
+      date: user?.createdAt ? new Date(user.createdAt).toLocaleString() : "N/A",
+
+      // Status
+      status: user?.status || "N/A",
+
+      // User Type (Example Logic)
+      userType: user?.role,
+
+      // Extra Fields (Optional – if you want to show)
+      headline: user?.headline || "",
+      expertise: user?.expertise?.join(", ") || "N/A",
+      skills: user?.skills,
+      followers: user?.followers ?? 0,
+      following: user?.following ?? 0,
+      points: user?.points ?? 0,
+      avgRating: user?.avgRating ?? 0,
+      isProfileSetup: user?.isProfileSetup ? "Completed" : "Incomplete",
+      customId: user?.id || "N/A",
     };
   });
-  const [searchText, setSearchText] = useState("");
-  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
-  // Block user handler
-  const handleBlockUser = () => {
-    message.success("User blocked successfully");
-  };
+  // change user status api
+  const [changeUserStatus, { isLoading: changeUserStatusLoading }] =
+    useChangeUserStatusMutation();
 
   // Approve user handler
-  const handleApproveUser = () => {
-    message.success("User approved successfully");
+  const handleApproveUser = async (id, status) => {
+    try {
+      const payload = {
+        userId: id,
+        status: status,
+      };
+      const res = await changeUserStatus(payload).unwrap();
+
+      if (res?.data?.message) {
+        toast.success(res?.data?.message || "User status updated successfully");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to update user status");
+    }
   };
 
   // Status render with colors
@@ -87,6 +129,7 @@ export default function BussinessAccDetailsTable({ limit }) {
             onClick={() => {
               setProfileModalOpen(true);
               setRole(userType);
+              SetSelecteduser(record);
             }}
           >
             <Eye color="#1B70A6" size={22} />
@@ -100,7 +143,7 @@ export default function BussinessAccDetailsTable({ limit }) {
               <CustomConfirm
                 title="Approve User"
                 description="Are you sure you want to approve this user?"
-                onConfirm={handleApproveUser}
+                onConfirm={() => handleApproveUser(record?.id, "active")}
               >
                 <button>
                   <CheckCircle color="#52C41A" size={22} />
@@ -116,7 +159,7 @@ export default function BussinessAccDetailsTable({ limit }) {
               <CustomConfirm
                 title="Block User"
                 description="Are you sure to block this user?"
-                onConfirm={handleBlockUser}
+                onConfirm={() => handleApproveUser(record?.id, "blocked")}
               >
                 <button>
                   <UserX color="#F16365" size={22} />
@@ -131,7 +174,7 @@ export default function BussinessAccDetailsTable({ limit }) {
             <CustomConfirm
               title="Unblock User"
               description="Are you sure to unblock this user?"
-              onConfirm={handleBlockUser}
+              onConfirm={() => handleApproveUser(record?.id, "active")}
             >
               <button>
                 <UserX color="gray" size={22} />
@@ -145,11 +188,6 @@ export default function BussinessAccDetailsTable({ limit }) {
 
   // ================== Table Columns ================
   const columns = [
-    {
-      title: "Serial",
-      dataIndex: "key",
-      render: (value) => `#${value}`,
-    },
     {
       title: "User Name",
       dataIndex: "name",
@@ -177,17 +215,25 @@ export default function BussinessAccDetailsTable({ limit }) {
     {
       title: "User Type",
       dataIndex: "userType",
-      render: (_, record) => (
-        <Tag color="blue" className="!text-base font-semibold">
-          {record.userType || "User"}
-        </Tag>
-      ),
-      filter: [
-        { text: "Admin", value: "Admin" },
-        { text: "User", value: "User" },
+      filters: [
+        { text: "Expert", value: "expert" },
+        { text: "Consult", value: "consult" },
       ],
+      filterIcon: (filtered) => (
+        <Filter
+          size={16}
+          color={filtered ? "#1B70A6" : "#000000"}
+          style={{ cursor: "pointer" }}
+        />
+      ),
       onFilter: (value, record) => record.userType === value,
-      FilterIcon: () => <FilterIcon size={16} />,
+      render: (value) => (
+        <span
+          className={`rounded-full px-3 py-1 text-sm font-semibold ${value === "consult" ? "border bg-green-100 text-green-600" : value === "expert" ? "border bg-blue-100 text-blue-600" : "border bg-gray-100 text-gray-600"}`}
+        >
+          {value}
+        </span>
+      ),
     },
     {
       title: "Joining Date",
@@ -228,12 +274,14 @@ export default function BussinessAccDetailsTable({ limit }) {
         columns={columns}
         dataSource={data}
         scroll={{ x: "max-content" }}
+        loading={isLoading}
       />
 
       <ProfileModal
         open={profileModalOpen}
         setOpen={setProfileModalOpen}
         role={role}
+        selectedUser={selectedUser}
       />
     </ConfigProvider>
   );

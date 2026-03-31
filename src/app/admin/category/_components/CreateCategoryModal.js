@@ -2,42 +2,104 @@
 
 import FormWrapper from "@/components/Form/FormWrapper";
 import UInput from "@/components/Form/UInput";
+import { useCreateCategoryMutation } from "@/redux/api/categoriesApi";
 import { Button, Modal } from "antd";
-import { Plus } from "lucide-react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function CreateCategoryModal({ open, setOpen }) {
+  const [items, setItems] = useState([""]);
+
+  // add category item
+  const [createCategories, { isLoading }] = useCreateCategoryMutation();
+
+  // add new input
+  const handleAdd = () => {
+    setItems([...items, ""]);
+  };
+
+  // remove input
+  const handleRemove = (index) => {
+    const updated = items.filter((_, i) => i !== index);
+    setItems(updated);
+  };
+
+  // change value
+  const handleChange = (value, index) => {
+    const updated = [...items];
+    updated[index] = value;
+    setItems(updated);
+  };
+
+  // submit
+  const handleSubmit = async (data) => {
+    const payload = {
+      title: data.name,
+      items: items.filter((item) => item.trim() !== ""),
+    };
+    try {
+      const response = await createCategories(payload).unwrap();
+      if (response.success) {
+        toast.success("Category created successfully!");
+        setOpen(false);
+        setItems([""]);
+      }
+    } catch (error) {
+      toast.error("Failed to create category.");
+    }
+  };
+
   return (
     <Modal
       centered
       open={open}
-      setOpen={setOpen}
       footer={null}
-      onCancel={() => {
-        setOpen(false);
-      }}
+      onCancel={() => setOpen(false)}
       title="Create Category"
     >
-      <FormWrapper>
+      <FormWrapper onSubmit={handleSubmit}>
+        {/* Category Name */}
         <UInput
           type="text"
           name="name"
           label="Category Name"
-          required={true}
+          required
           placeholder="Enter category name"
         />
 
-        {/* <div className="flex-center-between mb-6">
-          <div>
-            <h4 className="text-sm font-medium">Media</h4>
-            <p className="mb-3 mt-1">Add category banner image</p>
-          </div>
+        {/* Subcategories */}
+        <div className="mt-4 space-y-2">
+          <p className="font-medium">Subcategories</p>
 
-          <Button type="primary" htmlType="button" icon={<Plus size={20} />}>
-            Add media
+          {items.map((item, index) => (
+            <div key={index} className="flex gap-2">
+              <input
+                type="text"
+                value={item}
+                onChange={(e) => handleChange(e.target.value, index)}
+                placeholder="Enter subcategory"
+                className="w-full rounded border px-3 py-2"
+              />
+
+              <Button danger onClick={() => handleRemove(index)}>
+                Remove
+              </Button>
+            </div>
+          ))}
+
+          <Button type="dashed" onClick={handleAdd} className="w-full">
+            + Add Subcategory
           </Button>
-        </div> */}
+        </div>
 
-        <Button type="primary" size="large" className="w-full">
+        {/* Submit */}
+        <Button
+          htmlType="submit"
+          type="primary"
+          size="large"
+          className="mt-5 w-full"
+          loading={isLoading}
+        >
           Submit
         </Button>
       </FormWrapper>

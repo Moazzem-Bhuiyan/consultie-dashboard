@@ -10,7 +10,7 @@ export default function loading() {
         },
       }}
     >
-      <div className="h-[75vh] flex-center">
+      <div className="flex-center h-[75vh]">
         <Spin size="large" />
       </div>
     </ConfigProvider>

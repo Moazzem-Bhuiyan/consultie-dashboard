@@ -1,119 +1,89 @@
 "use client";
 
-import { ConfigProvider, Input, Table } from "antd";
-import clsx from "clsx";
-import { ArrowRightLeft, Search } from "lucide-react";
-import userImage from "@/assets/images/user-avatar-lg.png";
-import Image from "next/image";
-import { Filter } from "lucide-react";
-import { Tooltip } from "antd";
-import { Eye } from "lucide-react";
+import { ConfigProvider, Input, Table, Tag, Avatar } from "antd";
+import { Search, Eye } from "lucide-react";
 import { useState } from "react";
-import { Tag } from "antd";
+import dayjs from "dayjs";
 import EarningModal from "./EarningModal";
-
-// Dummy data
-const earningStats = [
-  {
-    key: "total",
-    title: "Total Earnings",
-    amount: 350000,
-  },
-];
-
-// Dummy table data
-const data = Array.from({ length: 7 }).map((_, inx) => ({
-  key: inx + 1,
-  name: "Moazzem Hossain",
-  subscription: inx % 2 === 0 ? "Monthly" : "6-Month",
-  contact: "+1234567890",
-  purchaseDate: "11 oct 24, 11.10PM",
-  expiredate: "11 oct 24, 11.10PM",
-  amount: 22,
-  accNumber: "1234567890",
-}));
+import { useGetTransactionsQuery } from "@/redux/api/transactionApi";
 
 export default function EarningsTable() {
   const [showEarningModal, setShowEarningModal] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // ================== Table Columns ================
+  const { data, isLoading } = useGetTransactionsQuery({
+    limit: 10,
+    page: currentPage,
+    searchText,
+  });
+
+  // 🔥 API Data
+  const earning = data?.data?.totalEarnings || 0;
+  const consult = data?.data?.consultAmount || 0;
+  const notifications = data?.data?.notifications || [];
+
+  // 🔥 Table Mapping
+  const tableData =
+    data?.data?.paymentList?.map((item) => ({
+      key: item._id,
+      fullData: item, // puri API object
+      id: item.id,
+      name: `${item.account?.firstName} ${item.account?.lastName}`,
+      image: item.account?.photoUrl,
+      amount: item.amount,
+      consultAmount: item.consultAmount,
+      accNumber: item.paymentIntentId,
+      date: dayjs(item.createdAt).format("DD MMM YYYY, hh:mm A"),
+      status: item.status,
+    })) || [];
+
+  // 🔥 Columns
   const columns = [
     {
-      title: "ID",
-      dataIndex: "key",
-      render: (value) => `#${value}`,
-    },
-    {
-      title: "User Name",
-      dataIndex: "name",
-    },
-    // {
-    //   title: "Subscription",
-    //   dataIndex: "subscription",
-    //   render: (value) => (
-    //     <Tag color="blue" className="!text-base font-semibold">
-    //       {value}
-    //     </Tag>
-    //   ),
-    // },
-    {
-      title: "Amount",
-      dataIndex: "amount",
-      render: (value) => (
-        <Tag color="blue" className="!text-base font-semibold">
-          ${value}
-        </Tag>
+      title: "User",
+      render: (_, record) => (
+        <div className="flex items-center gap-2">
+          <Avatar src={record.image} />
+          <span>{record.name}</span>
+        </div>
       ),
     },
     {
-      title: "ACC Number",
-      dataIndex: "accNumber",
+      title: "Transaction ID",
+      dataIndex: "id",
     },
     {
-      title: "Purchase Date",
-      dataIndex: "purchaseDate",
+      title: "Amount",
+      dataIndex: "amount",
+      render: (val) => <Tag color="blue">${val}</Tag>,
     },
-    // {
-    //   title: "Expire Date",
-    //   dataIndex: "expiredate",
-    // },
-
-    // {
-    //   title: "Pricing Plan",
-    //   dataIndex: "pricingPlan",
-
-    //   filters: [
-    //     {
-    //       text: "Monthly",
-    //       value: "monthly",
-    //     },
-    //     {
-    //       text: "Quarterly",
-    //       value: "quarterly",
-    //     },
-    //     {
-    //       text: "Yearly",
-    //       value: "yearly",
-    //     },
-    //   ],
-    //   filterIcon: () => (
-    //     <Filter
-    //       size={18}
-    //       color="#fff"
-    //       className="flex justify-start items-start"
-    //     />
-    //   ),
-    //   onFilter: (value, record) => record.pricingPlan.indexOf(value) === 0,
-    // },
-
+    {
+      title: "Consult Earn",
+      dataIndex: "consultAmount",
+      render: (val) => <Tag color="green">${val}</Tag>,
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      render: (status) => <Tag color="green">{status.toUpperCase()}</Tag>,
+    },
     {
       title: "Action",
-      render: () => (
-        <Tooltip title="Show Details">
-          <button onClick={() => setShowEarningModal(true)}>
-            <Eye color="#1B70A6" size={22} />
-          </button>
-        </Tooltip>
+      render: (_, record) => (
+        <button
+          onClick={() => {
+            setSelectedTransaction(record.fullData);
+            setShowEarningModal(true);
+          }}
+        >
+          <Eye size={20} />
+        </button>
       ),
     },
   ];
@@ -123,54 +93,74 @@ export default function EarningsTable() {
       theme={{
         token: {
           colorPrimary: "#1B70A6",
-          colorInfo: "#1B70A6",
         },
       }}
     >
-      {/* Earning stats */}
-      {/* <section className="he w-1/2">
-        {earningStats?.map((stat) => (
-          <div
-            key={stat.key}
-            className={clsx(
-              "flex-center-start h-[120px] gap-x-4 rounded-lg from-[#41839E] to-[#0B607E] px-5 py-4 text-lg text-white hover:bg-gradient-to-tr hover:from-[#41839E] hover:to-[#0B607E]",
-              stat.key === "today"
-                ? "bg-primary-blue"
-                : "bg-gradient-to-tr from-[#41839E] to-[#0B607E]",
-            )}
-          >
-            <ArrowRightLeft size={24} />
-            <p className="font-dmSans text-3xl">
-              {stat.title}
-              <span className="pl-3 text-3xl font-semibold">
-                $ {stat.amount || 0}
-              </span>
-            </p>
+      {/* 🔥 TOP SECTION */}
+      <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+        {/* ✅ Earnings Stats (Left) */}
+        <div className="rounded-xl bg-gradient-to-r from-pink-500 to-indigo-600 p-5 text-white shadow">
+          <h2 className="text-lg font-medium">Total Earnings</h2>
+          <p className="mt-2 text-3xl font-bold">${earning}</p>
+
+          <div className="mt-4 flex justify-between text-sm opacity-90">
+            <span>Consult Earn:</span>
+            <span>${consult}</span>
           </div>
-        ))}
-      </section> */}
-      <div className="mb-3 ml-auto w-1/3 gap-x-5">
+        </div>
+
+        {/* ✅ Notifications (Right) */}
+        <div className="rounded-xl bg-white p-5 shadow">
+          <h2 className="mb-3 text-lg font-semibold">Notifications</h2>
+
+          {notifications.length > 0 ? (
+            notifications.map((note) => (
+              <div
+                key={note._id}
+                className="mb-2 rounded-lg border p-3 hover:bg-gray-50"
+              >
+                <p className="font-medium">{note.message}</p>
+                <p className="text-sm text-gray-500">{note.description}</p>
+                <p className="mt-1 text-xs text-gray-400">
+                  {dayjs(note.date).format("DD MMM YYYY")}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No notifications</p>
+          )}
+        </div>
+      </div>
+
+      {/* 🔍 Search */}
+      <div className="mb-4 ml-auto h-12 w-full md:w-1/3">
         <Input
-          placeholder="Search by name or email"
-          prefix={<Search className="mr-2 text-black" size={20} />}
-          className="h-11 !rounded-lg !border !text-base"
+          placeholder="Search user..."
+          prefix={<Search size={18} />}
           onChange={(e) => setSearchText(e.target.value)}
         />
       </div>
 
-      {/* Earning table */}
-      <section className="my-10">
-        <Table
-          style={{ overflowX: "auto" }}
-          columns={columns}
-          dataSource={data}
-          scroll={{ x: "100%" }}
-          pagination
-        ></Table>
-      </section>
+      {/* 📊 TABLE */}
+      <Table
+        loading={isLoading}
+        columns={columns}
+        dataSource={tableData}
+        pagination={{
+          total: data?.meta?.total,
+          current: currentPage,
+          onChange: (page) => setCurrentPage(page),
+          showTotal: (total) => `Total ${total} items`,
+        }}
+        scroll={{ x: true }}
+      />
 
-      {/* Show earning modal */}
-      <EarningModal open={showEarningModal} setOpen={setShowEarningModal} />
+      {/* Modal */}
+      <EarningModal
+        open={showEarningModal}
+        setOpen={setShowEarningModal}
+        transaction={selectedTransaction}
+      />
     </ConfigProvider>
   );
 }

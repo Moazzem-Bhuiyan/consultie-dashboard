@@ -2,6 +2,8 @@ import localFont from "next/font/local";
 import { DM_Sans, Montserrat } from "next/font/google";
 import "./globals.css";
 import Providers from "../lib/Providers";
+import ReduxProviders from "@/redux/lib/ReduxProvider";
+import { Toaster } from "react-hot-toast";
 
 const generalSans = localFont({
   src: "../assets/fonts/GeneralSans-Variable.woff2",
@@ -26,11 +28,11 @@ const Mont_serrat = Montserrat({
 
 export const metadata = {
   title: {
-    default: "SkySync-App-Dashboard",
-    template: "%s | SkySync-App-Dashboard",
+    default: "Consult-App-Dashboard",
+    template: "%s | Consult-App-Dashboard",
   },
   description:
-    "SkySync App Dashboard - Manage and monitor your SkySync applications with ease.",
+    "The App Dashboard - Manage and monitor your SkySync applications with ease.",
 };
 
 export default function RootLayout({ children }) {
@@ -60,7 +62,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${generalSans.className} ${Mont_serrat.variable} box-border antialiased`}
       >
-        <Providers>{children}</Providers>
+        <ReduxProviders>
+          <Toaster richColors position="top-center" />
+          <Providers>{children}</Providers>
+        </ReduxProviders>
       </body>
     </html>
   );

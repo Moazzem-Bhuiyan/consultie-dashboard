@@ -5,32 +5,68 @@ import UserStatistics from "./UserStatics";
 import { QuickActions } from "./quick-action";
 import { RecentNotifications } from "./recent-notification";
 import BussinessAccDetailsTable from "../../account-details/_components/AccDetailsTable";
-
-// Dummy Data
-const userStats = [
-  {
-    key: "users",
-    title: "Total Users",
-    count: 518,
-  },
-  {
-    key: "Total Experts",
-    title: "Total Experts",
-    count: 118,
-  },
-  {
-    key: "earning",
-    title: "Total Revenue",
-    count: 218,
-  },
-  {
-    key: "earning",
-    title: "Commission",
-    count: 1500,
-  },
-];
+import { useState } from "react";
+import { useGetDashboardDataQuery } from "@/redux/api/dashboardApi";
+import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 
 export default function DashboardContainer() {
+  const [earning_year, setEarningYear] = useState(null);
+  const [revenue_year, setRevenueYear] = useState(null);
+
+  // get dashbaord data from api
+
+  const { data, isLoading } = useGetDashboardDataQuery({
+    revenue_year,
+    earning_year,
+  });
+
+  const userStats = [
+    {
+      key: "users",
+      title: "Total Consult ",
+      count: data?.data?.totalConsultCount || 0,
+    },
+    {
+      key: "Total Experts",
+      title: "Total Experts",
+      count: data?.data?.totalExpertCount || 0,
+    },
+    {
+      key: "earning",
+      title: "Total Earnings",
+      count: data?.data?.totalEarnings || 0,
+    },
+    {
+      key: "earning",
+      title: "Commission",
+      count: data?.data?.totalCommission || 0,
+    },
+  ];
+  const handleEarningYearChange = (year) => {
+    setEarningYear(year);
+  };
+  const handleRevenueYearChange = (year) => {
+    setRevenueYear(year);
+  };
+
+  if (isLoading) {
+    return (
+      <div div className="space-y-20">
+        <div className="flex gap-10">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+
+        <div className="justyfy-between flex gap-10">
+          <SkeletonCard width={600} rows={10} />
+          <SkeletonCard width={600} rows={10} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-20">
       <h1>
@@ -52,7 +88,7 @@ export default function DashboardContainer() {
                     <CustomCountUp end={stat.count} />
                   ) : (
                     <span>
-                      $<CustomCountUp end={stat.count} />
+                      $ <CustomCountUp end={stat.count} />
                     </span>
                   )}
                 </h5>
@@ -73,8 +109,14 @@ export default function DashboardContainer() {
       {/* Charts */}
       <section className="grid grid-cols-1 gap-5 lg:grid-cols-6">
         <div className="col-span-4 space-y-5">
-          <UserStatistics />
-          <EarningSummary />
+          <UserStatistics
+            earningOverview={data?.data?.earningOverview}
+            onYearChange={handleEarningYearChange}
+          />
+          <EarningSummary
+            revenueVsCommission={data?.data?.revenueVsCommission}
+            onYearChange={handleRevenueYearChange}
+          />
         </div>
         <div className="col-span-2 w-full space-y-5">
           <QuickActions />
