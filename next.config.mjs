@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ["10.10.10.26", "00.00.00.00"],
   redirects: async () => [
     {
       source: "/",

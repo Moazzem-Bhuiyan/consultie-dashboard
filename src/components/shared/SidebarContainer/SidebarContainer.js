@@ -2,6 +2,7 @@
 
 import "./Sidebar.css";
 import logo from "@/assets/logos/logoforsideber.png";
+import { logout } from "@/redux/features/authSlice";
 import { Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import {
@@ -24,22 +25,22 @@ import { House } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { RiFeedbackFill, RiFeedbackLine } from "react-icons/ri";
+import { useDispatch } from "react-redux";
 
 const SidebarContainer = ({ collapsed }) => {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const router = useRouter();
 
   // Logout handler
   const onClick = (e) => {
-    // if (e.key === "logout") {
-    //   dispatch(logout());
-    //   router.refresh();
-    //   router.push("/login");
-
-    //   Success_model({ title: "Logout successful" });
-    // }
-    console.log("logout success");
+    if (e.key === "logout") {
+      dispatch(logout());
+      router.refresh();
+      router.push("/login");
+      toast.success("Logout successful");
+    }
   };
 
   const navLinks = [
@@ -53,24 +54,12 @@ const SidebarContainer = ({ collapsed }) => {
       icon: <CircleUser size={21} strokeWidth={2} />,
       label: <Link href={"/admin/account-details"}>Accounts Details</Link>,
     },
-    // {
-    //   key: "Schedules-check",
-    //   icon: <Album size={21} strokeWidth={2} />,
-    //   label: <Link href={"/admin/schedules-check"}>Schedules check</Link>,
-    // },
 
     {
       key: "contentmoderation",
       icon: <StepForward size={21} strokeWidth={2} />,
       label: <Link href={"/admin/content-moderation"}>Content Moderation</Link>,
     },
-    // {
-    //   key: "analytics-reporting",
-    //   icon: <ChartSpline size={21} strokeWidth={2} />,
-    //   label: (
-    //     <Link href={"/admin/analytics-reporting"}>Analytics & Reporting</Link>
-    //   ),
-    // },
     {
       key: "Payment-&-Transaction",
       icon: <ArrowRightLeft size={21} strokeWidth={2} />,

@@ -1,6 +1,6 @@
 "use client";
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
-import { Table, Tag, Avatar, Input } from "antd";
+import { Table, Tag, Avatar, Input, Image } from "antd";
 import { Eye, Filter, Search } from "lucide-react";
 import React, { useState } from "react";
 import ViolationModal from "./ContentViewModal";
@@ -40,7 +40,12 @@ export default function ContentTable({
       key: "user",
       render: (_, record) => (
         <div className="flex items-center gap-2">
-          <Avatar src={record.userImage} />
+          {/* <Avatar src={record.userImage} /> */}
+          <Image
+            src={record.userImage}
+            alt="User Image"
+            className="aspect-square !h-10 !w-10 rounded-full object-cover"
+          />
           <span>{record.userName}</span>
         </div>
       ),

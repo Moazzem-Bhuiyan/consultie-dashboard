@@ -192,10 +192,8 @@ export default function BussinessAccDetailsTable({ limit }) {
       render: (value, record) => (
         <div className="flex-center-start gap-x-2">
           <Image
-            src={record?.userImg || userImage}
+            src={record?.userImg}
             alt="User avatar"
-            width={40}
-            height={35}
             className="aspect-square !h-10 !w-10 rounded-full"
           />
           <p className="font-medium">{value}</p>
