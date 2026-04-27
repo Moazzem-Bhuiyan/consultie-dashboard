@@ -7,15 +7,28 @@ import FormWrapper from "@/components/Form/FormWrapper";
 import UInput from "@/components/Form/UInput";
 import { Button } from "antd";
 import { ArrowLeft } from "lucide-react";
-import Image from "next/image";
-import logo from "@/assets/images/logo.png";
 import { useRouter } from "next/navigation";
+import { useForgetPasswordMutation } from "@/redux/api/authApi";
+import toast from "react-hot-toast";
 
 export default function ForgotPassForm() {
   const router = useRouter();
-  const onSubmit = (data) => {
-    console.log(data);
-    router.push("/otp-verification");
+  const [forgetPassword, { isLoading }] = useForgetPasswordMutation();
+  const onSubmit = async (data) => {
+    try {
+      const res = await forgetPassword(data).unwrap();
+      if (res?.success) {
+        toast.success(res?.message);
+        localStorage.setItem("forgetPasswordToken", res?.data?.verifyToken);
+        router.push("/otp-verification");
+      }
+    } catch (error) {
+      if (error?.data?.message) {
+        toast.error(error?.data?.message || "Failed to send OTP");
+      } else {
+        toast.error("Something went wrong");
+      }
+    }
   };
 
   return (
@@ -54,6 +67,7 @@ export default function ForgotPassForm() {
           style={{
             background: "linear-gradient(180deg, #D83578 0%, #962E84 100%)",
           }}
+          loading={isLoading}
         >
           Submit
         </Button>

@@ -23,7 +23,7 @@ const UOtpInput = ({
       name={name}
       render={({ field, fieldState: { error } }) => (
         <Form.Item
-        className="otp-input !w-full"
+          className="otp-input !w-full"
           label={
             Object.keys(labelStyles)?.length > 0 ? (
               <label style={labelStyles}>{label}</label>

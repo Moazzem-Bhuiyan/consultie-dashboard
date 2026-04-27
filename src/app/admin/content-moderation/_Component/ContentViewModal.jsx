@@ -42,13 +42,17 @@ const ViolationModal = ({ visible, onClose, data }) => {
     >
       {/* Author Section */}
       <div className="mb-4 flex items-center gap-4">
-        <Avatar src={post.author.photoUrl} size={64} icon={<UserOutlined />} />
+        <Avatar
+          src={post.author?.photoUrl || ""}
+          size={64}
+          icon={<UserOutlined />}
+        />
         <div>
           <Title level={4} style={{ margin: 0 }}>
-            {post.author.firstName} {post.author.lastName}
+            {post.author?.firstName} {post.author?.lastName}
           </Title>
-          {post.author.headline && (
-            <Text type="secondary">{post.author.headline}</Text>
+          {post.author?.headline && (
+            <Text type="secondary">{post.author?.headline}</Text>
           )}
         </div>
       </div>

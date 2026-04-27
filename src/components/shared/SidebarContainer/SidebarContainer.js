@@ -64,13 +64,13 @@ const SidebarContainer = ({ collapsed }) => {
       icon: <StepForward size={21} strokeWidth={2} />,
       label: <Link href={"/admin/content-moderation"}>Content Moderation</Link>,
     },
-    {
-      key: "analytics-reporting",
-      icon: <ChartSpline size={21} strokeWidth={2} />,
-      label: (
-        <Link href={"/admin/analytics-reporting"}>Analytics & Reporting</Link>
-      ),
-    },
+    // {
+    //   key: "analytics-reporting",
+    //   icon: <ChartSpline size={21} strokeWidth={2} />,
+    //   label: (
+    //     <Link href={"/admin/analytics-reporting"}>Analytics & Reporting</Link>
+    //   ),
+    // },
     {
       key: "Payment-&-Transaction",
       icon: <ArrowRightLeft size={21} strokeWidth={2} />,
@@ -94,11 +94,16 @@ const SidebarContainer = ({ collapsed }) => {
       icon: <Shapes size={21} strokeWidth={2} />,
       label: <Link href={"/admin/category"}>Categories</Link>,
     },
-    // {
-    //   key: "subscriptions",
-    //   icon: <CircleDollarSign size={21} strokeWidth={2} />,
-    //   label: <Link href={"/admin/manage-subscription"}>Subscriptions</Link>,
-    // },
+    {
+      key: "subscriptions",
+      icon: <CircleDollarSign size={21} strokeWidth={2} />,
+      label: <Link href={"/admin/manage-subscription"}>Subscriptions</Link>,
+    },
+    {
+      key: "terms-conditions",
+      icon: <ScrollText size={21} strokeWidth={2} />,
+      label: <Link href="/admin/terms-conditions">Terms & Conditions</Link>,
+    },
     // {
     //   key: "settings",
     //   icon: <SlidersVertical size={21} strokeWidth={2} />,
@@ -108,11 +113,6 @@ const SidebarContainer = ({ collapsed }) => {
     //       key: "privacy-policy",
     //       icon: <ScrollText size={21} strokeWidth={2} />,
     //       label: <Link href="/admin/privacy-policy">Privacy Policy</Link>,
-    //     },
-    //     {
-    //       key: "terms-conditions",
-    //       icon: <ScrollText size={21} strokeWidth={2} />,
-    //       label: <Link href="/admin/terms-conditions">Terms & Conditions</Link>,
     //     },
     //   ],
     // },

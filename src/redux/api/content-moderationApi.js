@@ -11,11 +11,24 @@ const ContentModerationApi = baseApi.injectEndpoints({
       invalidatesTags: ["contentModeration"],
     }),
     getContentModeration: builder.query({
-      query: ({ limit, page, searchText }) => ({
-        url: "/feeds",
-        method: "GET",
-        params: { limit, page, searchText },
-      }),
+      query: ({ limit, page, searchText }) => {
+        let url = "/feeds";
+
+        const params = new URLSearchParams();
+
+        if (limit) params.append("limit", limit);
+        if (page) params.append("page", page);
+        if (searchText) params.append("searchTerm", searchText);
+
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+
+        return {
+          url,
+          method: "GET",
+        };
+      },
       providesTags: ["contentModeration"],
     }),
     deleteContentModeration: builder.mutation({

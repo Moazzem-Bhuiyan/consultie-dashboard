@@ -32,7 +32,7 @@ export const metadata = {
     template: "%s | Consult-App-Dashboard",
   },
   description:
-    "The App Dashboard - Manage and monitor your SkySync applications with ease.",
+    "The App Dashboard - Where you can manage your consultations.",
 };
 
 export default function RootLayout({ children }) {

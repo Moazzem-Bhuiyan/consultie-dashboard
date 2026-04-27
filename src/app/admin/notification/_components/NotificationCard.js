@@ -1,29 +1,51 @@
-import { Trash2 } from "lucide-react";
-import Image from "next/image";
+"use client";
+import { useDeleteSingleNotificationMutation } from "@/redux/api/notificationApi";
+import { Bell, Trash2 } from "lucide-react";
+import moment from "moment";
+import toast from "react-hot-toast";
 
 export default function NotificationCard({ notification }) {
+  const [deleteFn, { isLoading }] = useDeleteSingleNotificationMutation();
+
+  const handleDelete = async (id) => {
+    try {
+      const res = await deleteFn(id).unwrap();
+      if (res.success) {
+        toast.success("Notification Deleted");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message);
+    }
+  };
   return (
-    <div className="flex-center-start gap-x-5">
-      <Image
-        src={notification.userImg}
-        alt="user avatar"
-        height={1200}
-        width={1200}
-        className="w-[75px] h-auto aspect-square rounded-full"
-      />
+    <div
+      className={`flex items-center justify-between gap-x-5 rounded-xl px-4 py-5 ${
+        notification?.read
+          ? "border border-[#A57EA5] bg-white text-black"
+          : "bg-gradient-to-tr from-[#ec8e76] to-[#E36B4E] text-white"
+      } `}
+    >
+      <div className="flex items-center gap-x-5">
+        <Bell size={32} />
 
-      <p className="text-xl">
-        <span className="text-[22px] font-semibold">
-          {notification.userName}
-        </span>{" "}
-        {notification.message}
-      </p>
+        <div>
+          <p className="text-[22px] text-xl font-semibold">
+            {notification?.message}
+          </p>
+          <p className="text-md"> {notification?.description}</p>
+        </div>
+      </div>
 
-      <div className="flex-center-between w-max whitespace-nowrap gap-x-6 mb-7 ml-10">
-        <p className="text-dark-gray">{notification.date}</p>
-
-        <button>
-          <Trash2 size={18} color="#F16365" />
+      <div className="flex gap-5">
+        <p className="text-dark ml-3 font-bold">
+          {moment(notification?.createdAt).startOf("hour").fromNow()}
+        </p>
+        <button onClick={() => handleDelete(notification?._id)}>
+          {isLoading ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-4 border-danger border-t-transparent"></div>
+          ) : (
+            <Trash2 className="text-red-500" />
+          )}
         </button>
       </div>
     </div>

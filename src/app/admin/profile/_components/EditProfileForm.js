@@ -2,13 +2,27 @@
 
 import FormWrapper from "@/components/Form/FormWrapper";
 import UInput from "@/components/Form/UInput";
-import { editProfileSchema } from "@/schema/profileSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useUpdateProfileinfoMutation } from "@/redux/api/authApi";
 import { Button } from "antd";
+import toast from "react-hot-toast";
 
-export default function EditProfileForm() {
-  const handleSubmit = (data) => {
-    console.log(data);
+export default function EditProfileForm({ user, selectedImage }) {
+  const [updateProfie, { isLoading }] = useUpdateProfileinfoMutation();
+  const handleSubmit = async (data) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("data", JSON.stringify(data));
+      if (selectedImage) {
+        formData.append("image", selectedImage);
+      }
+      const res = await updateProfie(formData).unwrap();
+      if (res.success) {
+        toast.success("Profile Update Successfully");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message);
+    }
   };
 
   return (
@@ -16,18 +30,20 @@ export default function EditProfileForm() {
       {/* <h4></h4> */}
       <FormWrapper
         onSubmit={handleSubmit}
-        resolver={zodResolver(editProfileSchema)}
         defaultValues={{
-          name: "Justina Ojuyluv",
-          email: "justina.ojuyluv@gmail.com",
-          contact: "+1234567890",
+          firstName: user?.firstName,
+          lastName: user?.lastName,
+          email: user?.email,
+          contractNumber: user?.contractNumber,
         }}
       >
-        <UInput name="name" label="Name" type="text" />
+        <UInput name="firstName" label="First Name" type="text" />
+        <UInput name="lastName" label="Last Name" type="text" />
         <UInput name="email" label="Email" type="email" disabled />
-        <UInput name="contact" label="Contact" type="contact" />
+        {/* <UInput name="contractNumber" label="Contract Number" type="text" /> */}
 
         <Button
+          loading={isLoading}
           htmlType="submit"
           className="w-full"
           size="large"

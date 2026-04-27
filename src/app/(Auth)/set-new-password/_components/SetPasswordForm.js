@@ -1,21 +1,30 @@
 "use client";
 
-import { LogoSvg } from "@/assets/logos/LogoSvg";
 import FormWrapper from "@/components/Form/FormWrapper";
 import UInput from "@/components/Form/UInput";
 import { resetPassSchema } from "@/schema/authSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "antd";
 import { ArrowLeft } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import logo from "@/assets/images/logo.png";
-import { Color } from "antd/es/color-picker";
+import { useResetPasswordMutation } from "@/redux/api/authApi";
+import toast from "react-hot-toast";
 
 export default function SetPasswordForm() {
-  const onSubmit = (data) => {
-    console.log(data);
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
+
+  const onSubmit = async (data) => {
+    try {
+      const res = await resetPassword(data).unwrap();
+      if (res?.success) {
+        toast.success(res?.message || "Password reset successfully");
+        localStorage.removeItem("forgetPasswordToken");
+        router.push("/login");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong");
+    }
   };
 
   return (
@@ -28,7 +37,6 @@ export default function SetPasswordForm() {
       </Link>
 
       <section className="mb-8 flex flex-col items-center justify-center space-y-2">
-        <Image src={logo} alt="logo" width={100} height={100} />
         <h4 className="text-3xl font-semibold text-white">Set New Password</h4>
         <p className="text-center text-white/90">
           Enter your new password login
@@ -60,8 +68,9 @@ export default function SetPasswordForm() {
           type="primary"
           size="large"
           className="!h-10 w-full !font-semibold"
+          loading={isLoading}
           style={{
-            background: "linear-gradient(90deg, #41839E 0%, #0B607E 100%)",
+            background: "linear-gradient(180deg, #D83578 0%, #962E84 100%)",
           }}
         >
           Submit

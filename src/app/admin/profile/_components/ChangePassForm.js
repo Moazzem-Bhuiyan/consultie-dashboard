@@ -2,16 +2,24 @@
 
 import FormWrapper from "@/components/Form/FormWrapper";
 import UInput from "@/components/Form/UInput";
-import {
-  changePasswordSchema,
-  editProfileSchema,
-} from "@/schema/profileSchema";
+import { useChangepasswordMutation } from "@/redux/api/authApi";
+import { changePasswordSchema } from "@/schema/profileSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "antd";
+import toast from "react-hot-toast";
 
 export default function ChangePassForm() {
-  const handleSubmit = (data) => {
-    console.log(data);
+  const [changePass, { isLoading }] = useChangepasswordMutation();
+
+  const handleSubmit = async (data) => {
+    try {
+      const res = await changePass(data).unwrap();
+      if (res.success) {
+        toast.success("Password Change Successfully");
+      }
+    } catch (error) {
+      toast.error(error?.data?.message);
+    }
   };
 
   return (
@@ -41,6 +49,7 @@ export default function ChangePassForm() {
         />
 
         <Button
+          loading={isLoading}
           htmlType="submit"
           className="w-full"
           size="large"

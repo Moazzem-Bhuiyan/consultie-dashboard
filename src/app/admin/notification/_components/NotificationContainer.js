@@ -1,36 +1,93 @@
-import userAvatar from "@/assets/images/user-avatar-lg.png";
-import NotificationCard from "./NotificationCard";
-import { Button } from "antd";
+"use client";
 
-// Dummy Data
-const notifications = Array.from({ length: 6 }).map((_, inx) => ({
-  key: inx + 1,
-  userName: "Maddie Johnson",
-  userImg: userAvatar,
-  message:
-    "registered as a customer looking for professional bridal makeup services near Los Angeles, CA",
-  date: inx + 1 + " days ago",
-}));
+import NotificationCard from "./NotificationCard";
+import { Button, Empty } from "antd";
+import {
+  useDeleteNotificationMutation,
+  useGetMyNotificationQuery,
+  useMarkAsReadMutation,
+} from "@/redux/api/notificationApi";
+import toast from "react-hot-toast";
+import { useState } from "react";
 
 export default function NotificationContainer() {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const query = {
+    page: currentPage,
+    limit: 10,
+  };
+
+  const {
+    data: notificationRes,
+    isLoading: notificationLoading,
+    isFetching,
+    refetch,
+  } = useGetMyNotificationQuery(query, {
+    pollingInterval: 2000,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 2000,
+    refetchIntervalInBackground: true,
+    refetchIntervalForegroundThreshold: 2000,
+    keepUnusedDataFor: 2000,
+  });
+  const notificationData = notificationRes?.data || [];
+  const [updateNotification, { isLoading: updateLoading }] =
+    useMarkAsReadMutation();
+  const [deleteNotification, { isLoading }] = useDeleteNotificationMutation();
+
+  const handelToRead = async () => {
+    try {
+      await updateNotification({}).unwrap();
+      toast.success("All Notification successfully mark as read");
+    } catch (error) {
+      toast.error(error?.data?.message);
+    }
+  };
+  const handelDelete = async () => {
+    try {
+      await deleteNotification({}).unwrap();
+      toast.success("All Notification Deleted successfully");
+    } catch (error) {
+      toast.error(error?.data?.message);
+    }
+  };
+
   return (
-    <div className="w-3/4 mx-auto mb-10">
-      <section className="mb-10 flex-center-between">
-        <h4 className="text-3xl font-semibold">Notifications</h4>
-
-        <div className="space-x-3">
-          <Button type="primary">Mark as read</Button>
-          <Button className="!bg-danger !text-white">Delete all</Button>
-        </div>
+    <div className="mx-auto mb-10 w-3/4">
+      <section className="flex-center-between mb-10">
+        {notificationData?.length > 0 && (
+          <div className="space-x-3">
+            <Button
+              onClick={handelToRead}
+              loading={updateLoading}
+              type="primary"
+            >
+              Mark as read
+            </Button>
+            <Button
+              loading={isLoading}
+              onClick={handelDelete}
+              className="!bg-danger !text-white"
+            >
+              Delete all
+            </Button>
+          </div>
+        )}
       </section>
-
       <section className="space-y-8">
-        {notifications?.map((notification) => (
-          <NotificationCard
-            key={notification.key}
-            notification={notification}
-          />
-        ))}
+        {notificationData?.length > 0 ? (
+          notificationData?.map((notification) => (
+            <NotificationCard
+              key={notification.key}
+              notification={notification}
+            />
+          ))
+        ) : (
+          <Empty description="No notification found" />
+        )}
       </section>
     </div>
   );

@@ -1,16 +1,14 @@
 "use client";
-import { Input, Table, Tag } from "antd";
+import { Image, Input, Table, Tag } from "antd";
 import { Tooltip } from "antd";
 import { ConfigProvider } from "antd";
-import { Filter, FilterIcon, Search } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 import userImage from "@/assets/images/nouser.png";
 import { Eye } from "lucide-react";
 import { UserX } from "lucide-react";
 import { CheckCircle } from "lucide-react";
 import { useState } from "react";
-import Image from "next/image";
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
-import { message } from "antd";
 import ProfileModal from "@/components/SharedModals/ProfileModal";
 import {
   useChangeUserStatusMutation,
@@ -26,7 +24,7 @@ export default function BussinessAccDetailsTable({ limit }) {
   const [selectedUser, SetSelecteduser] = useState("");
   // User data with query parameterss
   const { data: users, isLoading } = useGetAllusersQuery({
-    limit: 10,
+    limit: limit || 10,
     page: currentPage,
     searchText,
   });
@@ -194,11 +192,11 @@ export default function BussinessAccDetailsTable({ limit }) {
       render: (value, record) => (
         <div className="flex-center-start gap-x-2">
           <Image
-            src={record.userImg}
+            src={record?.userImg || userImage}
             alt="User avatar"
-            width={1200}
-            height={1200}
-            className="aspect-square h-auto w-10 rounded-full"
+            width={40}
+            height={35}
+            className="aspect-square !h-10 !w-10 rounded-full"
           />
           <p className="font-medium">{value}</p>
         </div>
@@ -275,6 +273,13 @@ export default function BussinessAccDetailsTable({ limit }) {
         dataSource={data}
         scroll={{ x: "max-content" }}
         loading={isLoading}
+        pagination={{
+          current: currentPage,
+          pageSize: limit || 10,
+          total: users?.meta?.total || 0,
+          onChange: (page) => setCurrentPage(page),
+          showTotal: (total) => `Total ${total} items`,
+        }}
       />
 
       <ProfileModal

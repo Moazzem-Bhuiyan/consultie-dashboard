@@ -107,8 +107,8 @@ export default function DashboardContainer() {
       </section>
 
       {/* Charts */}
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-6">
-        <div className="col-span-4 space-y-5">
+      <section className="">
+        <div className="flex w-full gap-10">
           <UserStatistics
             earningOverview={data?.data?.earningOverview}
             onYearChange={handleEarningYearChange}
@@ -118,17 +118,17 @@ export default function DashboardContainer() {
             onYearChange={handleRevenueYearChange}
           />
         </div>
-        <div className="col-span-2 w-full space-y-5">
+        {/* <div className="col-span-2 w-full space-y-5">
           <QuickActions />
           <RecentNotifications />
-        </div>
+        </div> */}
       </section>
 
       {/* Recent Users Table */}
       <section>
         {/* <RecentUserTable />
          */}
-        <BussinessAccDetailsTable />
+        <BussinessAccDetailsTable limit={5} />
       </section>
     </div>
   );

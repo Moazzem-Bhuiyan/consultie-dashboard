@@ -11,19 +11,34 @@ import {
   useGetCategoriesQuery,
 } from "@/redux/api/categoriesApi";
 import toast from "react-hot-toast";
+import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 
 export default function CategoryContainer() {
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   // get categories from api and map through them to display category cards
-  const { data: categoriesData } = useGetCategoriesQuery({
+  const { data: categoriesData, isLoading } = useGetCategoriesQuery({
     page: 1,
     limit: 10,
     searchText: "",
   });
   // delete categories api call
   const [deleteCategory] = useDeleteCategoryMutation();
+
+  if (isLoading) {
+    return (
+      <div div className="space-y-20">
+        <div className="grid grid-cols-3 gap-10">
+          <SkeletonCard width={500} rows={8} />
+          <SkeletonCard width={500} rows={8} />
+          <SkeletonCard width={500} rows={8} />
+          <SkeletonCard width={500} rows={8} />
+          <SkeletonCard width={500} rows={8} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div>
       {/* Create Category Button */}

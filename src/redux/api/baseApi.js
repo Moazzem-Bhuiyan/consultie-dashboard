@@ -72,6 +72,7 @@ export const baseApi = createApi({
     "contentModeration",
     "categories",
     "complain",
+    "withdrawals",
   ],
   baseQuery: baseQueryWithRefreshToken,
   endpoints: () => ({}),
