@@ -8,7 +8,7 @@ import { Edit } from "lucide-react";
 export default function AboutUsContainer() {
   return (
     <section>
-      <h3 className="text-2xl font-semibold mb-6">About Us</h3>
+      <h3 className="mb-6 text-2xl font-semibold">About Us</h3>
 
       <FormWrapper>
         <UTextEditor

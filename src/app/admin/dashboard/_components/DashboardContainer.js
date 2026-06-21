@@ -2,8 +2,6 @@
 import CustomCountUp from "@/components/CustomCountUp/CustomCountUp";
 import EarningSummary from "./Earnings";
 import UserStatistics from "./UserStatics";
-import { QuickActions } from "./quick-action";
-import { RecentNotifications } from "./recent-notification";
 import BussinessAccDetailsTable from "../../account-details/_components/AccDetailsTable";
 import { useState } from "react";
 import { useGetDashboardDataQuery } from "@/redux/api/dashboardApi";
@@ -23,12 +21,12 @@ export default function DashboardContainer() {
   const userStats = [
     {
       key: "users",
-      title: "Total Consult ",
+      title: "Total Consultantes",
       count: data?.data?.totalConsultCount || 0,
     },
     {
       key: "Total Experts",
-      title: "Total Experts",
+      title: "Total Consultants",
       count: data?.data?.totalExpertCount || 0,
     },
     {

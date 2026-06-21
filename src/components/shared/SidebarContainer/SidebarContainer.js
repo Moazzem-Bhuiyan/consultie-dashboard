@@ -5,28 +5,16 @@ import logo from "@/assets/logos/logoforsideber.png";
 import { logout } from "@/redux/features/authSlice";
 import { Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
-import {
-  Album,
-  ArrowRightLeft,
-  ChartSpline,
-  CircleDollarSign,
-  DollarSign,
-  MessageSquareMore,
-  Plus,
-  ShoppingCart,
-  StepForward,
-} from "lucide-react";
+import { ArrowRightLeft, CircleDollarSign, StepForward } from "lucide-react";
 import { Shapes } from "lucide-react";
 import { ScrollText } from "lucide-react";
 import { LogOut } from "lucide-react";
-import { SlidersVertical } from "lucide-react";
 import { CircleUser } from "lucide-react";
 import { House } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { RiFeedbackFill, RiFeedbackLine } from "react-icons/ri";
 import { useDispatch } from "react-redux";
 
 const SidebarContainer = ({ collapsed }) => {
@@ -68,11 +56,11 @@ const SidebarContainer = ({ collapsed }) => {
       ),
     },
 
-    {
-      key: "feedbacks",
-      icon: <RiFeedbackLine size={21} strokeWidth={2} />,
-      label: <Link href={"/admin/complain"}>Complain</Link>,
-    },
+    // {
+    //   key: "feedbacks",
+    //   icon: <RiFeedbackLine size={21} strokeWidth={2} />,
+    //   label: <Link href={"/admin/complain"}>Complain</Link>,
+    // },
     {
       key: "withdrawals",
       icon: <CircleDollarSign size={21} strokeWidth={2} />,
@@ -83,11 +71,11 @@ const SidebarContainer = ({ collapsed }) => {
       icon: <Shapes size={21} strokeWidth={2} />,
       label: <Link href={"/admin/category"}>Categories</Link>,
     },
-    {
-      key: "subscriptions",
-      icon: <CircleDollarSign size={21} strokeWidth={2} />,
-      label: <Link href={"/admin/manage-subscription"}>Subscriptions</Link>,
-    },
+    // {
+    //   key: "subscriptions",
+    //   icon: <CircleDollarSign size={21} strokeWidth={2} />,
+    //   label: <Link href={"/admin/manage-subscription"}>Subscriptions</Link>,
+    // },
     {
       key: "terms-conditions",
       icon: <ScrollText size={21} strokeWidth={2} />,

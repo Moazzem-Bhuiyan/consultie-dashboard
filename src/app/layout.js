@@ -31,8 +31,7 @@ export const metadata = {
     default: "Consult-App-Dashboard",
     template: "%s | Consult-App-Dashboard",
   },
-  description:
-    "The App Dashboard - Where you can manage your consultations.",
+  description: "The App Dashboard - Where you can manage your consultations.",
 };
 
 export default function RootLayout({ children }) {

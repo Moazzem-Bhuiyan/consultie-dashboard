@@ -7,8 +7,6 @@ import ChangePassForm from "./ChangePassForm";
 import EditProfileForm from "./EditProfileForm";
 import { useState, useRef } from "react";
 import userAvatar from "@/assets/images/user-avatar-lg.png";
-import PrivacyPolicyContainer from "../../(settings)/privacy-policy/_components/PrivacyPolicyContainer";
-import TermsConditionsContainer from "../../(settings)/terms-conditions/_components/TermsConditionsContainer";
 import { useGetMyProfileQuery } from "@/redux/api/authApi";
 
 const { TabPane } = Tabs;
@@ -114,12 +112,12 @@ export default function ProfileContainer() {
                 </div>
               </TabPane>
             </>
-            <TabPane tab="Privacy Policy" key="privacyPolicy">
+            {/* <TabPane tab="Privacy Policy" key="privacyPolicy">
               <PrivacyPolicyContainer />
             </TabPane>
             <TabPane tab="Terms & Conditions" key="termsConditions">
               <TermsConditionsContainer />
-            </TabPane>
+            </TabPane> */}
           </Tabs>
         </section>
       </div>
