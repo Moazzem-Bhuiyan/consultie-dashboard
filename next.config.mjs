@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  allowedDevOrigins: ["10.10.10.26", "00.00.00.00"],
+  allowedDevOrigins: ["10.10.10.27", "00.00.00.00"],
   redirects: async () => [
     {
       source: "/",
@@ -9,6 +9,7 @@ const nextConfig = {
     },
   ],
   images: {
+    
     remotePatterns: [
       {
         protocol: "https",

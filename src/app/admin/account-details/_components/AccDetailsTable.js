@@ -36,8 +36,7 @@ export default function BussinessAccDetailsTable({ limit }) {
       name: `${user?.firstName || ""} ${user?.lastName || ""}`,
 
       // Image
-      userImg: user?.photoUrl || userImage, // fallback image
-
+      userImg: user?.photoUrl || userImage,
       // Basic Info
       email: user?.email || "N/A",
       contact: user?.phoneNumber || "N/A",
@@ -191,11 +190,19 @@ export default function BussinessAccDetailsTable({ limit }) {
       dataIndex: "name",
       render: (value, record) => (
         <div className="flex-center-start gap-x-2">
-          <Image
-            src={record?.userImg}
-            alt="User avatar"
-            className="aspect-square !h-10 !w-10 rounded-full"
-          />
+          {
+            record?.userImg ? (
+              <Image
+                src={record?.userImg}
+                alt="User avatar"
+                width={52}
+                height={52}
+                className="aspect-square rounded-full"
+              />
+            ) : (
+              <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center"> <UserX size={24} color="#9CA3AF" /></div>
+            )
+          }
           <p className="font-medium">{value}</p>
         </div>
       ),

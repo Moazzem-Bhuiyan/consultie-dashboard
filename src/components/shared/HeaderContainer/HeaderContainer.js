@@ -4,7 +4,6 @@ import { Button } from "antd";
 import { Bell } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import userAvatar from "@/assets/images/user-avatar-lg.png";
 import { usePathname } from "next/navigation";
 import { Layout } from "antd";
 import { AlignJustify } from "lucide-react";
@@ -61,7 +60,7 @@ export default function HeaderContainer({ collapsed, setCollapsed }) {
           className="group flex items-center gap-x-2 text-black hover:text-primary-blue"
         >
           <Image
-            src={user?.photoUrl || userAvatar}
+            src={user?.photoUrl}
             alt="Admin avatar"
             width={52}
             height={52}

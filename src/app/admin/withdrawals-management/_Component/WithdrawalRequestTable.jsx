@@ -2,7 +2,7 @@
 
 import { Button, ConfigProvider, Input, Table } from "antd";
 import { Tooltip } from "antd";
-import { Check, Eye, Search, Trash2 } from "lucide-react";
+import {  Eye, Search } from "lucide-react";
 import { useState } from "react";
 import { Tag } from "antd";
 import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
@@ -179,7 +179,7 @@ export default function WithdrawalRequestTables() {
           type="primary"
           className="!h-11"
         >
-          Update Hold Period
+          Update general settings
         </Button>
       </div>
       {/* Show table */}

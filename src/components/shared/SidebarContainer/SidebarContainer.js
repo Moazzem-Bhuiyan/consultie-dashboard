@@ -81,6 +81,12 @@ const SidebarContainer = ({ collapsed }) => {
       icon: <ScrollText size={21} strokeWidth={2} />,
       label: <Link href="/admin/terms-conditions">Terms & Conditions</Link>,
     },
+    {
+      key: "privacy-policy",
+      icon: <ScrollText size={21} strokeWidth={2} />,
+      label: <Link href="/admin/privacy-policy">Privacy Policy</Link>,
+    },
+
     // {
     //   key: "settings",
     //   icon: <SlidersVertical size={21} strokeWidth={2} />,

@@ -3,8 +3,8 @@
 import FormWrapper from "@/components/Form/FormWrapper";
 import UTextEditor from "@/components/Form/UTextEditor";
 import {
-  useGetContentsQuery,
-  useUpdateContentMutation,
+  useGetContentsTermsandConditionsQuery,
+  useUpdateContentTermsandConditionsMutation,
 } from "@/redux/api/contentApi";
 import { Button } from "antd";
 import { Edit } from "lucide-react";
@@ -12,12 +12,13 @@ import toast from "react-hot-toast";
 
 export default function TermsConditionsContainer() {
   // get content api handaller
-  const { data } = useGetContentsQuery();
-  const value = data?.data?.termsAndConditions;
+  const { data, isLoading } = useGetContentsTermsandConditionsQuery();
+  const value = data?.data?.value;
 
   // update contetnt api handeller
 
-  const [updateContent, { isLoading: updating }] = useUpdateContentMutation();
+  const [updateContent, { isLoading: updating }] =
+    useUpdateContentTermsandConditionsMutation();
 
   const handleSubmit = async (values) => {
     try {
@@ -29,13 +30,17 @@ export default function TermsConditionsContainer() {
       toast.error(error?.data?.message);
     }
   };
+
+  if (isLoading) {
+    return <p>Loading...</p>;
+  }
   return (
     <section>
       <h3 className="mb-6 text-2xl font-semibold">Terms and Conditions</h3>
 
       <FormWrapper onSubmit={handleSubmit}>
         <UTextEditor
-          name="termsAndConditions"
+          name="value"
           placeholder="Note: Enter details about your terms and conditions here."
           value={value}
         />

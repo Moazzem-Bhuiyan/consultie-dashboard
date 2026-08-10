@@ -2,20 +2,23 @@
 
 import FormWrapper from "@/components/Form/FormWrapper";
 import UTextEditor from "@/components/Form/UTextEditor";
+
 import {
-  useGetContentsQuery,
-  useUpdateContentMutation,
+  useGetContentsPrivacyPolicyQuery,
+  useUpdateContentPrivacyPolicyMutation,
 } from "@/redux/api/contentApi";
 import { Button } from "antd";
 import { Edit } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function PrivacyPolicyContainer() {
-  const { data } = useGetContentsQuery();
-  const value = data?.data?.privacyPolicy;
+  const { data } = useGetContentsPrivacyPolicyQuery();
+  const value = data?.data?.value;
+
   // update contetnt api handeller
 
-  const [updateContent, { isLoading: updating }] = useUpdateContentMutation();
+  const [updateContent, { isLoading: updating }] =
+    useUpdateContentPrivacyPolicyMutation();
 
   const handleSubmit = async (values) => {
     try {
@@ -35,7 +38,7 @@ export default function PrivacyPolicyContainer() {
       <FormWrapper onSubmit={handleSubmit}>
         <UTextEditor
           value={value}
-          name="privacyPolicy"
+          name="value"
           placeholder="Note: Enter details about your privacy policy here."
         />
 
