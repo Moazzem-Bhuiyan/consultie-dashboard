@@ -35,7 +35,7 @@ export default function UpdateGeneralSettingsModal({ open, setOpen }) {
     try {
       const res = await updateContent({ payload }).unwrap();
       if (res?.success) {
-        toast.success("Settings updatedd successfully");
+        toast.success("Settings updated successfully");
         setOpen(false);
       }
     } catch (error) {
