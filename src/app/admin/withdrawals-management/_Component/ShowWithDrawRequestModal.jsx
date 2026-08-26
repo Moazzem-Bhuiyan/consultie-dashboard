@@ -51,7 +51,7 @@ export default function ShowWithDrawRequestModal({ open, setOpen, id }) {
             <div className="rounded-xl bg-white p-4 shadow">
               <p className="text-sm text-gray-500">Amount</p>
               <h2 className="text-xl font-bold text-blue-600">
-                ${withdraw?.amount}
+                £ {withdraw?.amount}
               </h2>
             </div>
 

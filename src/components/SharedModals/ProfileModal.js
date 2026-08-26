@@ -1,386 +1,491 @@
 "use client";
 
 import { useGetSingleUserQuery } from "@/redux/api/userApi";
-import { Modal } from "antd";
+import { Modal, Spin, Tag, Progress, Empty } from "antd";
 import Image from "next/image";
+import moment from "moment";
 
 export default function ProfileModal({ open, setOpen, role, selectedUser }) {
-  const handleCancel = () => {
-    setOpen(false);
-  };
+  const handleCancel = () => setOpen(false);
 
-  // get single user info
-
-  const { data: user } = useGetSingleUserQuery(selectedUser?.id, {
-    skip: !selectedUser?.id,
+  const { data, isLoading, isError } = useGetSingleUserQuery(selectedUser?.id, {
+    skip: !selectedUser?.id || !open,
   });
-  console.log("🚀 ~ ProfileModal ~ user:", user);
 
-  // Consultant view component
-  const ConsultantView = () => (
-    <>
-      {/* Header section with gradient */}
-      <div className="relative bg-gradient-to-br from-[#962E84] via-[#1b71a7] to-[#D83578] px-8 pb-12 pt-8">
-        {/* Decorative elements */}
+  const user = data?.data;
+
+  const fullName = user
+    ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+    : selectedUser?.name || "—";
+
+  const photo =
+    user?.photoUrl || selectedUser?.userImg || "/placeholder-avatar.png";
+
+  // ========== EXPERT VIEW ==========
+  const ExpertView = () => (
+    <div className="max-h-[80vh] overflow-y-auto">
+      {/* Header */}
+      <div className="relative bg-gradient-to-br from-[#962E84] via-[#1b71a7] to-[#D83578] px-8 pb-10 pt-8">
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-24 w-24 rounded-full bg-purple-500/10 blur-2xl" />
 
-        {/* Avatar */}
-        <div className="relative mx-auto mb-4 h-24 w-24">
+        <div className="relative mx-auto mb-4 h-28 w-28">
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#D83578] to-[#962E84] blur-md" />
           <Image
-            src={selectedUser?.userImg}
-            alt="Profile"
-            width={96}
-            height={96}
-            className="relative h-24 w-24 rounded-full border-4 border-white object-cover shadow-xl"
+            src={photo}
+            alt={fullName}
+            width={112}
+            height={112}
+            className="relative h-28 w-28 rounded-full border-4 border-white object-cover shadow-xl"
           />
         </div>
 
-        {/* Name */}
         <h2 className="text-center text-2xl font-bold text-white">
-          {selectedUser?.name}
+          {fullName}
         </h2>
-        <p className="text-center text-sm text-gray-100">
-          {selectedUser?.role}
-        </p>
+        {user?.headline && (
+          <p className="mt-1 text-center text-sm text-white/90">
+            {user.headline}
+          </p>
+        )}
+        <div className="mt-2 flex justify-center gap-2">
+          <Tag color="blue" className="rounded-full border-0 px-3">
+            Expert
+          </Tag>
+          <Tag
+            color={user?.status === "active" ? "success" : "error"}
+            className="rounded-full border-0 px-3 capitalize"
+          >
+            {user?.status}
+          </Tag>
+          {user?.isTopExpert && (
+            <Tag color="gold" className="rounded-full border-0 px-3">
+              Top Expert
+            </Tag>
+          )}
+        </div>
       </div>
 
-      {/* Consultant Stats section */}
-      <div className="space-y-6 p-8">
-        {/* Following and Followers */}
-        <div className="flex gap-8 text-center">
+      <div className="space-y-6 p-6">
+        {/* Bio */}
+        {user?.bio && (
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {selectedUser?.following}
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+              Bio
             </h3>
-            <p className="text-sm text-gray-500">Following</p>
+            <p className="text-sm leading-relaxed text-gray-700">{user.bio}</p>
           </div>
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {selectedUser?.followers}
-            </h3>
-            <p className="text-sm text-gray-500">Followers</p>
-          </div>
+        )}
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard
+            label="Followers"
+            value={user?.followers ?? 0}
+            color="pink"
+          />
+          <StatCard
+            label="Following"
+            value={user?.following ?? 0}
+            color="blue"
+          />
+          <StatCard label="Points" value={user?.points ?? 0} color="amber" />
+          <StatCard
+            label="Avg Rating"
+            value={user?.avgRating ?? 0}
+            color="yellow"
+          />
+          <StatCard
+            label="Total Bookings"
+            value={user?.totalBookings ?? 0}
+            color="purple"
+          />
+          <StatCard
+            label="Pending"
+            value={user?.pendingBookings ?? 0}
+            color="orange"
+          />
+          <StatCard
+            label="Profile Views"
+            value={user?.profileViewCount ?? 0}
+            color="cyan"
+          />
+          <StatCard
+            label="Attendance"
+            value={`${user?.avgAttendance ?? 0}%`}
+            color="green"
+          />
         </div>
 
-        {/* Consultz Stats */}
+        {/* Profile Progress */}
         <div>
-          <h3 className="mb-4 text-lg font-bold text-gray-900">
-            Consultz stats
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            {/* Consultz Points */}
-            <div className="rounded-lg bg-pink-50 p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-200 text-pink-600">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                </div>
-                <p className="text-xs font-semibold text-pink-600">
-                  Consultz Points
-                </p>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900">
-                {selectedUser?.points}
-              </h4>
-            </div>
-
-            {/* Av. star rating */}
-            <div className="rounded-lg bg-yellow-50 p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-200 text-yellow-600">
-                  <svg
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                </div>
-                <p className="text-xs font-semibold text-yellow-600">
-                  Av. star rating
-                </p>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900">
-                {selectedUser?.avgRating}
-              </h4>
-            </div>
-
-            {/* Av. attendance */}
-            <div className="rounded-lg bg-purple-50 p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-200 text-purple-600">
-                  <svg
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-2.96-3.83c-.3-.39-.97-.39-1.25 0-.31.4-.32 1.02.05 1.37l3.6 4.55c.3.39.97.39 1.25 0L17.3 7.74c.37-.35.36-.98.05-1.37-.28-.39-.95-.39-1.25 0z" />
-                  </svg>
-                </div>
-                <p className="text-xs font-semibold text-purple-600">
-                  Av. attendance
-                </p>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900">100%</h4>
-            </div>
-
-            {/* Advising time */}
-            <div className="rounded-lg bg-green-50 p-4">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-200 text-green-600">
-                  <svg
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-                  </svg>
-                </div>
-                <p className="text-xs font-semibold text-green-600">
-                  Advising time
-                </p>
-              </div>
-              <h4 className="text-2xl font-bold text-gray-900">60 hrs</h4>
-            </div>
-          </div>
-        </div>
-
-        {/* Key expertise */}
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <h4 className="font-bold text-gray-900">Key expertise</h4>
-            <a href="#" className="text-sm text-blue-600 hover:text-blue-700">
-              {selectedUser?.expertise}
-            </a>
-          </div>
-        </div>
-
-        {/* Language */}
-        <div>
-          <div className="flex items-center justify-between">
-            <h4 className="font-bold text-gray-900">Language</h4>
-            <span className="text-sm text-gray-600">
-              <a href="#" className="text-blue-600 hover:text-blue-700">
-                +2
-              </a>{" "}
-              <a href="#" className="text-blue-600 hover:text-blue-700">
-                English
-              </a>
+          <div className="mb-1 flex justify-between text-sm">
+            <span className="font-medium text-gray-700">Profile Setup</span>
+            <span className="text-gray-500">
+              {user?.profileSetupProgress ?? 0}%
             </span>
           </div>
+          <Progress
+            percent={user?.profileSetupProgress ?? 0}
+            strokeColor={{ from: "#962E84", to: "#1b71a7" }}
+            showInfo={false}
+          />
         </div>
+
+        {/* Contact & Basic Info */}
+        <Section title="Contact & Info">
+          <InfoRow label="Email" value={user?.email} />
+          <InfoRow label="Phone" value={user?.phoneNumber || "—"} />
+          <InfoRow label="Country" value={user?.country || "—"} />
+          <InfoRow label="Timezone" value={user?.timeZone || "—"} />
+          <InfoRow label="User ID" value={user?.id || "—"} />
+          <InfoRow
+            label="Joined"
+            value={
+              user?.createdAt
+                ? moment(user.createdAt).format("MMM D, YYYY")
+                : "—"
+            }
+          />
+          <InfoRow label="Referral Code" value={user?.referralCode || "—"} />
+        </Section>
+
+        {/* Pricing */}
+        <Section title="Pricing & Sessions">
+          <InfoRow
+            label="Hourly Rate"
+            value={user?.hourlyRate ? `£${user.hourlyRate}` : "—"}
+          />
+          <InfoRow
+            label="Advising Time"
+            value={user?.advisingTime ? `${user.advisingTime} min` : "—"}
+          />
+          <InfoRow
+            label="VAT Registered"
+            value={user?.isVatRegistered || user?.isVatRegisted ? "Yes" : "No"}
+          />
+          {(user?.isVatRegistered || user?.isVatRegisted) && (
+            <>
+              <InfoRow
+                label="VAT Number"
+                value={user?.vatRegistrationNumber || "—"}
+              />
+              <InfoRow
+                label="VAT %"
+                value={user?.vatPercentage ? `${user.vatPercentage}%` : "—"}
+              />
+            </>
+          )}
+          <InfoRow
+            label="Stripe Connected"
+            value={user?.isConnectedStripe ? "Yes" : "No"}
+          />
+          <InfoRow
+            label="Pending Withdraw"
+            value={
+              user?.pendingWithdraw != null ? `£${user.pendingWithdraw}` : "—"
+            }
+          />
+          <InfoRow
+            label="Total Withdraw"
+            value={user?.totalWithdraw != null ? `£${user.totalWithdraw}` : "—"}
+          />
+        </Section>
+
+        {/* Session Durations */}
+        {user?.sessionDurations?.length > 0 && (
+          <Section title="Session Packages">
+            <div className="grid gap-2 sm:grid-cols-3">
+              {user.sessionDurations.map((s, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-gray-100 bg-gray-50 p-3 text-center"
+                >
+                  <p className="text-xs font-medium text-gray-500">{s.type}</p>
+                  <p className="mt-1 text-lg font-bold text-gray-900">
+                    {s.duration} min
+                  </p>
+                  <p className="text-sm font-semibold text-blue-600">
+                    £{s.offeredPrice ?? s.price}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Availability */}
+        {user?.availability?.length > 0 && (
+          <Section title="Availability">
+            <div className="flex flex-wrap gap-2">
+              {user.availability.map((a, i) => (
+                <div
+                  key={i}
+                  className="rounded-lg border border-gray-100 bg-white px-3 py-2 text-sm"
+                >
+                  <span className="font-semibold capitalize text-gray-800">
+                    {a.day}
+                  </span>
+                  <span className="ml-2 text-gray-500">
+                    {a.slots?.map((s) => `${s.from}–${s.to}`).join(", ")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Expertise */}
+        {user?.expertise?.length > 0 && (
+          <Section title="Key Expertise">
+            <div className="flex flex-wrap gap-2">
+              {user.expertise.map((item, i) => (
+                <Tag key={i} color="blue" className="rounded-full px-3 py-0.5">
+                  {item}
+                </Tag>
+              ))}
+            </div>
+          </Section>
+        )}
 
         {/* Skills */}
-        <div>
-          <h4 className="mb-2 font-bold text-gray-900">Skills</h4>
-          <div className="flex gap-2">
-            {selectedUser?.skills?.map((skill, index) => (
-              <span
-                key={index}
-                className="inline-flex items-center rounded bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
+        {user?.skills?.length > 0 && (
+          <Section title="Skills">
+            <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto">
+              {user.skills.map((skill, i) => (
+                <Tag
+                  key={i}
+                  className="rounded-full border-blue-100 bg-blue-50 px-3 py-0.5 text-blue-700"
+                >
+                  {skill}
+                </Tag>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Advising Styles */}
+        {user?.advisingStyles?.length > 0 && (
+          <Section title="Advising Styles">
+            <div className="flex flex-wrap gap-2">
+              {user.advisingStyles.map((style, i) => (
+                <Tag
+                  key={i}
+                  color="purple"
+                  className="rounded-full px-3 py-0.5"
+                >
+                  {style}
+                </Tag>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Languages */}
+        {user?.languages?.length > 0 && (
+          <Section title="Languages">
+            <div className="flex flex-wrap gap-2">
+              {user.languages.map((lang, i) => (
+                <Tag key={i} className="rounded-full px-3 py-0.5">
+                  {lang}
+                </Tag>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Education */}
+        {(user?.education?.degree ||
+          user?.education?.phd ||
+          user?.education?.certificate?.length > 0) && (
+          <Section title="Education">
+            {user.education.degree && (
+              <InfoRow label="Degree" value={user.education.degree} />
+            )}
+            {user.education.phd && (
+              <InfoRow label="PhD" value={user.education.phd} />
+            )}
+            {user.education.certificate?.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {user.education.certificate.map((c, i) => (
+                  <Tag key={i}>{c}</Tag>
+                ))}
+              </div>
+            )}
+          </Section>
+        )}
       </div>
-    </>
+    </div>
   );
 
-  // User view component
-  const UserView = () => (
-    <>
-      <div className="relative bg-gradient-to-br from-[#962E84] via-[#1b71a7] to-[#D83578] px-8 pb-12 pt-8">
+  // ========== CONSULT VIEW ==========
+  const ConsultView = () => (
+    <div className="max-h-[80vh] overflow-y-auto">
+      {/* Header */}
+      <div className="relative bg-gradient-to-br from-[#962E84] via-[#1b71a7] to-[#D83578] px-8 pb-10 pt-8">
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/10 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-24 w-24 rounded-full bg-purple-500/10 blur-2xl" />
 
-        <div className="relative mx-auto mb-4 h-24 w-24">
+        <div className="relative mx-auto mb-4 h-28 w-28">
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#D83578] to-[#962E84] blur-md" />
           <Image
-            src={selectedUser?.userImg}
-            alt="Profile"
-            width={96}
-            height={96}
-            className="relative h-24 w-24 rounded-full border-4 border-white object-cover shadow-xl"
+            src={photo}
+            alt={fullName}
+            width={112}
+            height={112}
+            className="relative h-28 w-28 rounded-full border-4 border-white object-cover shadow-xl"
           />
         </div>
 
         <h2 className="text-center text-2xl font-bold text-white">
-          {selectedUser?.name}
+          {fullName}
         </h2>
-      </div>
-
-      <div className="space-y-2 p-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded border p-10 pr-4">
-            <h1 className="text-4xl font-semibold">10</h1>
-            <h1>Total bookings</h1>
-          </div>
-          <div className="rounded-md border p-10 pl-4">
-            <h1 className="text-4xl font-semibold">606</h1>
-            <h1>Consultz points</h1>
-          </div>
-        </div>
-
-        <div className="group rounded-xl border border-gray-100 p-4 transition-all hover:border-gray-200 hover:bg-gray-50">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Full Name
-              </p>
-              <p className="mt-1 text-base font-semibold text-gray-900">
-                Justina Ojayluv
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="group rounded-xl border border-gray-100 p-4 transition-all hover:border-gray-200 hover:bg-gray-50">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600 transition-colors group-hover:bg-purple-100">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Email Address
-              </p>
-              <p className="mt-1 text-base font-semibold text-gray-900">
-                justina@gmail.com
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="group rounded-xl border border-gray-100 p-4 transition-all hover:border-gray-200 hover:bg-gray-50">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 text-green-600 transition-colors group-hover:bg-green-100">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Phone Number
-              </p>
-              <p className="mt-1 text-base font-semibold text-gray-900">
-                +234 813 123 4567
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="group rounded-xl border border-gray-100 p-4 transition-all hover:border-gray-200 hover:bg-gray-50">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-600 transition-colors group-hover:bg-amber-100">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Job Role
-              </p>
-              <div className="mt-1">
-                <span className="inline-flex items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-1 text-sm font-semibold text-white shadow-sm">
-                  Graphic Designer
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="group rounded-xl border border-gray-100 p-4 transition-all hover:border-gray-200 hover:bg-gray-50">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-600 transition-colors group-hover:bg-amber-100">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                Account Type
-              </p>
-              <div className="mt-1">
-                <span className="inline-flex items-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-1 text-sm font-semibold text-white shadow-sm">
-                  User
-                </span>
-              </div>
-            </div>
-          </div>
+        {user?.headline && (
+          <p className="mt-1 text-center text-sm text-white/90">
+            {user.headline}
+          </p>
+        )}
+        <div className="mt-2 flex justify-center gap-2">
+          <Tag color="cyan" className="rounded-full border-0 px-3">
+            Consultant
+          </Tag>
+          <Tag
+            color={user?.status === "active" ? "success" : "error"}
+            className="rounded-full border-0 px-3 capitalize"
+          >
+            {user?.status}
+          </Tag>
         </div>
       </div>
-    </>
+
+      <div className="space-y-6 p-6">
+        {/* Bio */}
+        {user?.bio && (
+          <div>
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+              Bio
+            </h3>
+            <p className="text-sm leading-relaxed text-gray-700">{user.bio}</p>
+          </div>
+        )}
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard
+            label="Followers"
+            value={user?.followers ?? 0}
+            color="pink"
+          />
+          <StatCard
+            label="Following"
+            value={user?.following ?? 0}
+            color="blue"
+          />
+          <StatCard label="Points" value={user?.points ?? 0} color="amber" />
+          <StatCard
+            label="Total Bookings"
+            value={user?.totalBookings ?? 0}
+            color="purple"
+          />
+          <StatCard
+            label="Pending"
+            value={user?.pendingBookings ?? 0}
+            color="orange"
+          />
+          <StatCard
+            label="Profile Views"
+            value={user?.profileViewCount ?? 0}
+            color="cyan"
+          />
+          <StatCard
+            label="Attendance"
+            value={`${user?.avgAttendance ?? 0}%`}
+            color="green"
+          />
+          <StatCard
+            label="Price Range"
+            value={user?.priceRange || "—"}
+            color="indigo"
+          />
+        </div>
+
+        {/* Profile Progress */}
+        <div>
+          <div className="mb-1 flex justify-between text-sm">
+            <span className="font-medium text-gray-700">Profile Setup</span>
+            <span className="text-gray-500">
+              {user?.profileSetupProgress ?? 0}%
+            </span>
+          </div>
+          <Progress
+            percent={user?.profileSetupProgress ?? 0}
+            strokeColor={{ from: "#962E84", to: "#1b71a7" }}
+            showInfo={false}
+          />
+        </div>
+
+        {/* Contact */}
+        <Section title="Contact & Info">
+          <InfoRow label="Email" value={user?.email} />
+          <InfoRow label="Phone" value={user?.phoneNumber || "—"} />
+          <InfoRow label="Country" value={user?.country || "—"} />
+          <InfoRow label="Timezone" value={user?.timeZone || "—"} />
+          <InfoRow label="User ID" value={user?.id || "—"} />
+          <InfoRow
+            label="Joined"
+            value={
+              user?.createdAt
+                ? moment(user.createdAt).format("MMM D, YYYY")
+                : "—"
+            }
+          />
+          <InfoRow label="Referral Code" value={user?.referralCode || "—"} />
+        </Section>
+
+        {/* Interests */}
+        {user?.interests?.length > 0 && (
+          <Section title="Interests">
+            <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto">
+              {user.interests.map((item, i) => (
+                <Tag key={i} color="blue" className="rounded-full px-3 py-0.5">
+                  {item}
+                </Tag>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Learning Styles */}
+        {user?.learningStyles?.length > 0 && (
+          <Section title="Learning Styles">
+            <div className="flex flex-wrap gap-2">
+              {user.learningStyles.map((style, i) => (
+                <Tag
+                  key={i}
+                  color="purple"
+                  className="rounded-full px-3 py-0.5"
+                >
+                  {style}
+                </Tag>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Languages */}
+        {user?.languages?.length > 0 && (
+          <Section title="Languages">
+            <div className="flex flex-wrap gap-2">
+              {user.languages.map((lang, i) => (
+                <Tag key={i} className="rounded-full px-3 py-0.5">
+                  {lang}
+                </Tag>
+              ))}
+            </div>
+          </Section>
+        )}
+      </div>
+    </div>
   );
 
   return (
@@ -389,11 +494,70 @@ export default function ProfileModal({ open, setOpen, role, selectedUser }) {
       open={open}
       onCancel={handleCancel}
       footer={null}
-      width={700}
+      width={980}
+      destroyOnClose
+      styles={{ body: { padding: 0 } }}
     >
       <div className="overflow-hidden rounded-2xl">
-        {role === "expert" ? <ConsultantView /> : <UserView />}
+        {isLoading ? (
+          <div className="flex h-80 items-center justify-center">
+            <Spin size="large" />
+          </div>
+        ) : isError || !user ? (
+          <div className="flex h-80 items-center justify-center">
+            <Empty description="Failed to load profile" />
+          </div>
+        ) : user.role === "expert" || role === "expert" ? (
+          <ExpertView />
+        ) : (
+          <ConsultView />
+        )}
       </div>
     </Modal>
+  );
+}
+
+/* ========== Small helpers ========== */
+
+function Section({ title, children }) {
+  return (
+    <div>
+      <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        {title}
+      </h3>
+      <div className="space-y-2">{children}</div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b border-gray-50 py-2 last:border-0">
+      <span className="text-sm text-gray-500">{label}</span>
+      <span className="text-right text-sm font-medium text-gray-900">
+        {value || "—"}
+      </span>
+    </div>
+  );
+}
+
+function StatCard({ label, value, color = "blue" }) {
+  const colors = {
+    pink: "bg-pink-50 text-pink-600",
+    blue: "bg-blue-50 text-blue-600",
+    amber: "bg-amber-50 text-amber-600",
+    yellow: "bg-yellow-50 text-yellow-600",
+    purple: "bg-purple-50 text-purple-600",
+    orange: "bg-orange-50 text-orange-600",
+    cyan: "bg-cyan-50 text-cyan-600",
+    green: "bg-green-50 text-green-600",
+    indigo: "bg-indigo-50 text-indigo-600",
+  };
+
+  return (
+    <div className={`rounded-xl p-3 ${colors[color] || colors.blue}`}>
+      <p className="text-[11px] font-medium opacity-80">{label}</p>
+      <p className="mt-1 text-xl font-bold text-gray-900">{value}</p>
+    </div>
   );
 }

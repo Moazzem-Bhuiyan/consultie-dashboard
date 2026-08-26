@@ -1,9 +1,8 @@
 "use client";
-import { Image, Input, Table, Tag } from "antd";
+import { Image, Input, Table } from "antd";
 import { Tooltip } from "antd";
 import { ConfigProvider } from "antd";
-import { Filter, Search } from "lucide-react";
-import userImage from "@/assets/images/nouser.png";
+import { Filter, Search, Trophy } from "lucide-react";
 import { Eye } from "lucide-react";
 import { UserX } from "lucide-react";
 import { CheckCircle } from "lucide-react";
@@ -15,11 +14,13 @@ import {
   useGetAllusersQuery,
 } from "@/redux/api/userApi";
 import toast from "react-hot-toast";
+import PointMangementModal from "@/components/SharedModals/PointMangementModal";
 
 export default function BussinessAccDetailsTable({ limit }) {
   const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [pointModalOpen, setPointModalOpen] = useState(false);
   const [role, setRole] = useState(null);
   const [selectedUser, SetSelecteduser] = useState("");
   // User data with query parameterss
@@ -36,7 +37,7 @@ export default function BussinessAccDetailsTable({ limit }) {
       name: `${user?.firstName || ""} ${user?.lastName || ""}`,
 
       // Image
-      userImg: user?.photoUrl || userImage,
+      userImg: user?.photoUrl,
       // Basic Info
       email: user?.email || "N/A",
       contact: user?.phoneNumber || "N/A",
@@ -84,36 +85,6 @@ export default function BussinessAccDetailsTable({ limit }) {
     }
   };
 
-  // Status render with colors
-  const renderStatus = (status) => {
-    switch (status) {
-      case "pending":
-        return (
-          <Tag color="orange" className="!text-base font-semibold">
-            Pending
-          </Tag>
-        );
-      case "active":
-        return (
-          <Tag color="green" className="!text-base font-semibold">
-            Active
-          </Tag>
-        );
-      case "blocked":
-        return (
-          <Tag color="red" className="!text-base font-semibold">
-            Blocked
-          </Tag>
-        );
-      default:
-        return (
-          <Tag color="default" className="!text-base font-semibold">
-            {status}
-          </Tag>
-        );
-    }
-  };
-
   // Conditional action buttons based on status
   const renderActions = (record) => {
     const { status } = record;
@@ -130,6 +101,16 @@ export default function BussinessAccDetailsTable({ limit }) {
             }}
           >
             <Eye color="#1B70A6" size={22} />
+          </button>
+        </Tooltip>
+        <Tooltip title="Point Management">
+          <button
+            onClick={() => {
+              setPointModalOpen(true);
+              SetSelecteduser(record);
+            }}
+          >
+            <Trophy color="#1B70A6" size={22} />
           </button>
         </Tooltip>
 
@@ -179,6 +160,19 @@ export default function BussinessAccDetailsTable({ limit }) {
             </CustomConfirm>
           </Tooltip>
         )}
+        {status === "warning" && (
+          <Tooltip title="User is warned">
+            <CustomConfirm
+              title="Activate User"
+              description="Are you sure to activate this user?"
+              onConfirm={() => handleApproveUser(record?.id, "active")}
+            >
+              <button>
+                <UserX color="gray" size={22} />
+              </button>
+            </CustomConfirm>
+          </Tooltip>
+        )}
       </div>
     );
   };
@@ -190,19 +184,20 @@ export default function BussinessAccDetailsTable({ limit }) {
       dataIndex: "name",
       render: (value, record) => (
         <div className="flex-center-start gap-x-2">
-          {
-            record?.userImg ? (
-              <Image
-                src={record?.userImg}
-                alt="User avatar"
-                width={52}
-                height={52}
-                className="aspect-square rounded-full"
-              />
-            ) : (
-              <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center"> <UserX size={24} color="#9CA3AF" /></div>
-            )
-          }
+          {record?.userImg ? (
+            <Image
+              src={record?.userImg}
+              alt="User avatar"
+              width={52}
+              height={52}
+              className="aspect-square rounded-full"
+            />
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
+              {" "}
+              <UserX size={24} color="#9CA3AF" />
+            </div>
+          )}
           <p className="font-medium">{value}</p>
         </div>
       ),
@@ -211,10 +206,7 @@ export default function BussinessAccDetailsTable({ limit }) {
       title: "Email",
       dataIndex: "email",
     },
-    {
-      title: "Contact",
-      dataIndex: "contact",
-    },
+
     {
       title: "User Type",
       dataIndex: "userType",
@@ -245,7 +237,26 @@ export default function BussinessAccDetailsTable({ limit }) {
     {
       title: "Status",
       dataIndex: "status",
-      render: (value) => renderStatus(value),
+      filters: [
+        { text: "Active", value: "active" },
+        { text: "Blocked", value: "blocked" },
+        { text: "Warning", value: "warning" },
+      ],
+      filterIcon: (filtered) => (
+        <Filter
+          size={16}
+          color={filtered ? "#1B70A6" : "#000000"}
+          style={{ cursor: "pointer" }}
+        />
+      ),
+      onFilter: (value, record) => record.status === value,
+      render: (value) => (
+        <span
+          className={`rounded-full px-3 py-1 text-sm font-semibold ${value === "active" ? "border bg-green-100 text-green-600" : value === "blocked" ? "border bg-red-100 text-red-600" : "border bg-yellow-100 text-yellow-600"}`}
+        >
+          {value}
+        </span>
+      ),
     },
     {
       title: "Action",
@@ -291,6 +302,12 @@ export default function BussinessAccDetailsTable({ limit }) {
         open={profileModalOpen}
         setOpen={setProfileModalOpen}
         role={role}
+        selectedUser={selectedUser}
+      />
+
+      <PointMangementModal
+        open={pointModalOpen}
+        setOpen={setPointModalOpen}
         selectedUser={selectedUser}
       />
     </ConfigProvider>

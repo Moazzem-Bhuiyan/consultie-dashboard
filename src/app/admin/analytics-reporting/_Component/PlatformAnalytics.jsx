@@ -90,7 +90,7 @@ const PlatformAnalytics = ({ chartData, setSelectedYear, selectedYear }) => {
           />
 
           <Tooltip
-            formatter={(value) => [`Monthly Earning: $${value}`]}
+            formatter={(value) => [`Monthly Earning: £${value}`]}
             contentStyle={{
               color: "var(--primary-green)",
               fontWeight: "500",

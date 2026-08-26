@@ -73,6 +73,8 @@ export const baseApi = createApi({
     "categories",
     "complain",
     "withdrawals",
+    "PointManagement",
+    "ReportedContent",
   ],
   baseQuery: baseQueryWithRefreshToken,
   endpoints: () => ({}),

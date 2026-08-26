@@ -46,12 +46,10 @@ const ContentModerationApi = baseApi.injectEndpoints({
       providesTags: ["contentModeration"],
     }),
     updateContentModeration: builder.mutation({
-      query: ({ id, status }) => ({
-        url: `/feeds/status/${id}`,
+      query: ({ id, data }) => ({
+        url: `/feeds/${id}/moderation`,
         method: "PATCH",
-        body: {
-          status,
-        },
+        body: data,
       }),
       invalidatesTags: ["contentModeration"],
     }),

@@ -4,7 +4,7 @@ export default function EarningofConsultTable() {
   const data = Array.from({ length: 10 }).map((_, inx) => ({
     key: inx + 1,
     consultantName: `Consultant ${inx + 1}`,
-    totalEarnings: `$${(inx + 1) * 1000}`,
+    totalEarnings: `£${(inx + 1) * 1000}`,
     completedProjects: Math.floor(Math.random() * 50) + 1,
     rating: (Math.random() * 5).toFixed(1),
     dataIndex: "status",

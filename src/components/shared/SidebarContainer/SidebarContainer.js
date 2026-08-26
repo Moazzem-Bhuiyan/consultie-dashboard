@@ -48,6 +48,11 @@ const SidebarContainer = ({ collapsed }) => {
       icon: <StepForward size={21} strokeWidth={2} />,
       label: <Link href={"/admin/content-moderation"}>Content Moderation</Link>,
     },
+    // {
+    //   key: "repoted-content",
+    //   icon: <StepForward size={21} strokeWidth={2} />,
+    //   label: <Link href={"/admin/repoted-content"}>Repoted Content</Link>,
+    // },
     {
       key: "Payment-&-Transaction",
       icon: <ArrowRightLeft size={21} strokeWidth={2} />,
