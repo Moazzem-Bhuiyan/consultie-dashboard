@@ -23,7 +23,7 @@ export default function DashboardContainer() {
   const primaryStats = [
     {
       key: "consults",
-      title: "Total Consultants",
+      title: "Total Consultees",
       count: dashboard.totalConsultCount || 0,
       isMoney: false,
     },

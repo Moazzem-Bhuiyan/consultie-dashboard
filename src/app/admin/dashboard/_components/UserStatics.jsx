@@ -16,7 +16,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-full bg-black px-3 py-2 text-sm font-medium text-white">
-        £ {Math.round(payload[0].value)} Salse in {label}
+        £ {Math.round(payload[0].value)} Sales in {label}
       </div>
     );
   }

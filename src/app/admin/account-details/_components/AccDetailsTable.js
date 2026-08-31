@@ -2,7 +2,7 @@
 import { Image, Input, Table } from "antd";
 import { Tooltip } from "antd";
 import { ConfigProvider } from "antd";
-import { Filter, Search, Trophy } from "lucide-react";
+import { Filter, Search, Trophy, Trash2 } from "lucide-react";
 import { Eye } from "lucide-react";
 import { UserX } from "lucide-react";
 import { CheckCircle } from "lucide-react";
@@ -11,10 +11,12 @@ import CustomConfirm from "@/components/CustomConfirm/CustomConfirm";
 import ProfileModal from "@/components/SharedModals/ProfileModal";
 import {
   useChangeUserStatusMutation,
+  useDeleteUserMutation,
   useGetAllusersQuery,
 } from "@/redux/api/userApi";
 import toast from "react-hot-toast";
 import PointMangementModal from "@/components/SharedModals/PointMangementModal";
+import moment from "moment";
 
 export default function BussinessAccDetailsTable({ limit }) {
   const [searchText, setSearchText] = useState("");
@@ -23,12 +25,14 @@ export default function BussinessAccDetailsTable({ limit }) {
   const [pointModalOpen, setPointModalOpen] = useState(false);
   const [role, setRole] = useState(null);
   const [selectedUser, SetSelecteduser] = useState("");
-  // User data with query parameterss
+
+  // User data with query parameters
   const { data: users, isLoading } = useGetAllusersQuery({
     limit: limit || 10,
     page: currentPage,
     searchText,
   });
+
   const data = users?.data?.userList?.map((user, inx) => {
     return {
       key: user?._id || inx + 1,
@@ -43,15 +47,15 @@ export default function BussinessAccDetailsTable({ limit }) {
       contact: user?.phoneNumber || "N/A",
 
       // Date (Formatted)
-      date: user?.createdAt ? new Date(user.createdAt).toLocaleString() : "N/A",
+      date: moment(user?.createdAt).format("DD-MM-YYYY-HH:mm"),
 
       // Status
       status: user?.status || "N/A",
 
-      // User Type (Example Logic)
+      // User Type
       userType: user?.role,
 
-      // Extra Fields (Optional – if you want to show)
+      // Extra Fields
       headline: user?.headline || "",
       expertise: user?.expertise?.join(", ") || "N/A",
       skills: user?.skills,
@@ -64,11 +68,14 @@ export default function BussinessAccDetailsTable({ limit }) {
     };
   });
 
+  // Delete User Handler
+  const [deleteUser, { isLoading: deleteLoading }] = useDeleteUserMutation();
+
   // change user status api
   const [changeUserStatus, { isLoading: changeUserStatusLoading }] =
     useChangeUserStatusMutation();
 
-  // Approve user handler
+  // Approve / Block / Unblock handler
   const handleApproveUser = async (id, status) => {
     try {
       const payload = {
@@ -82,6 +89,16 @@ export default function BussinessAccDetailsTable({ limit }) {
       }
     } catch (error) {
       toast.error(error?.data?.message || "Failed to update user status");
+    }
+  };
+
+  // Delete User
+  const handleDeleteUser = async (id) => {
+    try {
+      const res = await deleteUser(id).unwrap();
+      toast.success(res?.data?.message || "User deleted successfully");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to delete user");
     }
   };
 
@@ -103,6 +120,7 @@ export default function BussinessAccDetailsTable({ limit }) {
             <Eye color="#1B70A6" size={22} />
           </button>
         </Tooltip>
+
         <Tooltip title="Point Management">
           <button
             onClick={() => {
@@ -116,35 +134,31 @@ export default function BussinessAccDetailsTable({ limit }) {
 
         {/* Conditional buttons based on status */}
         {status === "pending" && (
-          <>
-            <Tooltip title="Approve User">
-              <CustomConfirm
-                title="Approve User"
-                description="Are you sure you want to approve this user?"
-                onConfirm={() => handleApproveUser(record?.id, "active")}
-              >
-                <button>
-                  <CheckCircle color="#52C41A" size={22} />
-                </button>
-              </CustomConfirm>
-            </Tooltip>
-          </>
+          <Tooltip title="Approve User">
+            <CustomConfirm
+              title="Approve User"
+              description="Are you sure you want to approve this user?"
+              onConfirm={() => handleApproveUser(record?.id, "active")}
+            >
+              <button>
+                <CheckCircle color="#52C41A" size={22} />
+              </button>
+            </CustomConfirm>
+          </Tooltip>
         )}
 
         {status === "active" && (
-          <>
-            <Tooltip title="Block User">
-              <CustomConfirm
-                title="Block User"
-                description="Are you sure to block this user?"
-                onConfirm={() => handleApproveUser(record?.id, "blocked")}
-              >
-                <button>
-                  <UserX color="#F16365" size={22} />
-                </button>
-              </CustomConfirm>
-            </Tooltip>
-          </>
+          <Tooltip title="Block User">
+            <CustomConfirm
+              title="Block User"
+              description="Are you sure to block this user?"
+              onConfirm={() => handleApproveUser(record?.id, "blocked")}
+            >
+              <button>
+                <UserX color="#F16365" size={22} />
+              </button>
+            </CustomConfirm>
+          </Tooltip>
         )}
 
         {status === "blocked" && (
@@ -160,6 +174,7 @@ export default function BussinessAccDetailsTable({ limit }) {
             </CustomConfirm>
           </Tooltip>
         )}
+
         {status === "warning" && (
           <Tooltip title="User is warned">
             <CustomConfirm
@@ -173,6 +188,19 @@ export default function BussinessAccDetailsTable({ limit }) {
             </CustomConfirm>
           </Tooltip>
         )}
+
+        {/* Delete button - always available */}
+        <Tooltip title="Delete User">
+          <CustomConfirm
+            title="Delete User"
+            description="Are you sure you want to delete this user? This action cannot be undone."
+            onConfirm={() => handleDeleteUser(record?.id)}
+          >
+            <button disabled={deleteLoading}>
+              <Trash2 color="#F16365" size={22} />
+            </button>
+          </CustomConfirm>
+        </Tooltip>
       </div>
     );
   };
@@ -194,7 +222,6 @@ export default function BussinessAccDetailsTable({ limit }) {
             />
           ) : (
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
-              {" "}
               <UserX size={24} color="#9CA3AF" />
             </div>
           )}
@@ -206,7 +233,6 @@ export default function BussinessAccDetailsTable({ limit }) {
       title: "Email",
       dataIndex: "email",
     },
-
     {
       title: "User Type",
       dataIndex: "userType",
@@ -224,9 +250,15 @@ export default function BussinessAccDetailsTable({ limit }) {
       onFilter: (value, record) => record.userType === value,
       render: (value) => (
         <span
-          className={`rounded-full px-3 py-1 text-sm font-semibold ${value === "consult" ? "border bg-green-100 text-green-600" : value === "expert" ? "border bg-blue-100 text-blue-600" : "border bg-gray-100 text-gray-600"}`}
+          className={`rounded-full px-3 py-1 text-sm font-semibold ${
+            value === "consult"
+              ? "border bg-green-100 text-green-600"
+              : value === "expert"
+                ? "border bg-blue-100 text-blue-600"
+                : "border bg-gray-100 text-gray-600"
+          }`}
         >
-          {value}
+          {value === "expert" ? "Expert" : "Consultee"}
         </span>
       ),
     },
@@ -252,7 +284,13 @@ export default function BussinessAccDetailsTable({ limit }) {
       onFilter: (value, record) => record.status === value,
       render: (value) => (
         <span
-          className={`rounded-full px-3 py-1 text-sm font-semibold ${value === "active" ? "border bg-green-100 text-green-600" : value === "blocked" ? "border bg-red-100 text-red-600" : "border bg-yellow-100 text-yellow-600"}`}
+          className={`rounded-full px-3 py-1 text-sm font-semibold ${
+            value === "active"
+              ? "border bg-green-100 text-green-600"
+              : value === "blocked"
+                ? "border bg-red-100 text-red-600"
+                : "border bg-yellow-100 text-yellow-600"
+          }`}
         >
           {value}
         </span>
