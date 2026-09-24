@@ -1,6 +1,7 @@
 .sidebar-menu > .ant-menu-item,
 .sidebar-menu .ant-menu-submenu {
-  @apply bg-white font-medium text-base !rounded-lg !shadow-none !border-none;
+  @apply !rounded-lg !border-none bg-white text-base font-medium !shadow-none;
+  margin-bottom: 10px !important; /* spacing between items */
 }
 
 .sidebar-menu .ant-menu-submenu {
@@ -8,7 +9,7 @@
 }
 
 .sidebar-menu .ant-menu-sub li {
-  padding-left: 40px !important;
+  padding-left: 50px !important;
   transition: none !important;
 }
 

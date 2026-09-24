@@ -113,7 +113,7 @@ export default function UpdateGeneralSettingsModal({ open, setOpen }) {
 
           <Button
             htmlType="submit"
-            className="w-full mt-2"
+            className="mt-2 w-full"
             size="large"
             type="primary"
             loading={updating}

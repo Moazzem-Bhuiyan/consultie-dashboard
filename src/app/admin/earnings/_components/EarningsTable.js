@@ -1,22 +1,40 @@
 "use client";
 
-import { ConfigProvider, Input, Table, Tag, Avatar } from "antd";
+import {
+  ConfigProvider,
+  Input,
+  Table,
+  Tag,
+  Avatar,
+  Select,
+  DatePicker,
+} from "antd";
 import { Search, Eye, UserX } from "lucide-react";
 import { useState } from "react";
 import dayjs from "dayjs";
 import EarningModal from "./EarningModal";
 import { useGetTransactionsQuery } from "@/redux/api/transactionApi";
 
+const { RangePicker } = DatePicker;
+
 export default function EarningsTable() {
   const [showEarningModal, setShowEarningModal] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [status, setStatus] = useState(undefined);
+  const [dateRange, setDateRange] = useState(null);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const startDate = dateRange?.[0]?.format("YYYY-MM-DD");
+  const endDate = dateRange?.[1]?.format("YYYY-MM-DD");
 
   const { data, isLoading } = useGetTransactionsQuery({
     limit: 10,
     page: currentPage,
-    searchText,
+    searchText: searchText || undefined,
+    status: status || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
   });
 
   // ===== Stats from API =====
@@ -28,6 +46,7 @@ export default function EarningsTable() {
   const tableData =
     data?.data?.paymentList?.map((item) => ({
       key: item._id,
+      _id: item._id,
       fullData: item,
       id: item.id,
       name: `${item.account?.firstName || ""} ${item.account?.lastName || ""}`.trim(),
@@ -123,6 +142,8 @@ export default function EarningsTable() {
           withdrawn: "success",
           pending_session: "warning",
           pending: "default",
+          cleared: "processing",
+          refunded: "error",
         };
         return (
           <Tag
@@ -139,7 +160,10 @@ export default function EarningsTable() {
       dataIndex: "status",
       width: 100,
       render: (status) => (
-        <Tag color="green" className="rounded-full uppercase">
+        <Tag
+          color={status === "refunded" ? "red" : "green"}
+          className="rounded-full uppercase"
+        >
           {status}
         </Tag>
       ),
@@ -178,7 +202,6 @@ export default function EarningsTable() {
     >
       {/* ========== STATS CARDS ========== */}
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Gross Booking Value */}
         <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-5 shadow-sm">
           <p className="text-sm font-medium text-blue-600">
             Gross Booking Value
@@ -189,7 +212,6 @@ export default function EarningsTable() {
           <p className="mt-1 text-xs text-gray-500">Total session value</p>
         </div>
 
-        {/* Platform Deduction */}
         <div className="rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50 to-amber-50 p-5 shadow-sm">
           <p className="text-sm font-medium text-orange-600">
             Platform Deduction
@@ -200,7 +222,6 @@ export default function EarningsTable() {
           <p className="mt-1 text-xs text-gray-500">Commission + VAT</p>
         </div>
 
-        {/* Expert Payout */}
         <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-5 shadow-sm">
           <p className="text-sm font-medium text-emerald-600">Expert Payout</p>
           <p className="mt-2 text-3xl font-bold text-gray-900">
@@ -210,18 +231,59 @@ export default function EarningsTable() {
         </div>
       </div>
 
-      {/* ========== SEARCH ========== */}
-      <div className="mb-4 ml-auto w-full md:w-80">
-        <Input
-          placeholder="Search by user name..."
-          prefix={<Search size={16} className="text-gray-400" />}
-          onChange={(e) => {
-            setSearchText(e.target.value);
-            setCurrentPage(1);
-          }}
-          allowClear
-          className="h-11 rounded-xl"
-        />
+      {/* ========== FILTERS ========== */}
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Status Filter */}
+          <Select
+            placeholder="Filter by Status"
+            allowClear
+            style={{ width: 160 }}
+            value={status}
+            onChange={(value) => {
+              setStatus(value);
+              setCurrentPage(1);
+            }}
+            options={[
+              { value: "paid", label: "Paid" },
+              { value: "refunded", label: "Refunded" },
+              { value: "authorized", label: "Authorized" },
+              { value: "unpaid", label: "Unpaid" },
+              { value: "failed", label: "Failed" },
+              { value: "cancelled", label: "Cancelled" },
+              // add more statuses if your backend supports them
+            ]}
+            className="h-11"
+          />
+
+          {/* Date Range Filter */}
+          <RangePicker
+            className="h-11"
+            format="YYYY-MM-DD"
+            placeholder={["Start Date", "End Date"]}
+            value={dateRange}
+            onChange={(dates) => {
+              setDateRange(dates);
+              setCurrentPage(1);
+            }}
+            allowClear
+          />
+        </div>
+
+        {/* Search */}
+        <div className="w-full sm:w-80">
+          <Input
+            placeholder="Search by user name..."
+            prefix={<Search size={16} className="text-gray-400" />}
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setCurrentPage(1);
+            }}
+            allowClear
+            className="h-11 rounded-xl"
+          />
+        </div>
       </div>
 
       {/* ========== TABLE ========== */}
@@ -246,7 +308,7 @@ export default function EarningsTable() {
       <EarningModal
         open={showEarningModal}
         setOpen={setShowEarningModal}
-        transaction={selectedTransaction}
+        transactionID={selectedTransaction?._id}
       />
     </ConfigProvider>
   );

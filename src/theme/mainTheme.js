@@ -75,7 +75,7 @@ export const mainTheme = {
       headerSplitColor: "#667085",
       headerColor: "#667085",
       colorBgContainer: "var(--demin-primary-00)",
-      cellFontSize: 16,
+      cellFontSize: 13,
       colorText: "black",
       borderColor: "rgba(255, 255, 255, 0.18)",
       footerColor: "rgba(31, 41, 55, 0.88)",

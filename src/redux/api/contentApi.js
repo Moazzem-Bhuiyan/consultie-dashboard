@@ -1,6 +1,5 @@
 import { baseApi } from "./baseApi";
 
-
 const ContentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getContentsTermsandConditions: builder.query({
@@ -33,7 +32,7 @@ const ContentApi = baseApi.injectEndpoints({
       providesTags: ["content"],
     }),
     updateGeneralSettings: builder.mutation({
-      query: ({payload}) => ({
+      query: ({ payload }) => ({
         url: `/contents/generals`,
         method: "PUT",
         body: payload,
@@ -41,6 +40,15 @@ const ContentApi = baseApi.injectEndpoints({
       invalidatesTags: ["content"],
     }),
 
+    // get setttings log
+    getSettingsLogs: builder.query({
+      query: ({ page = 1, limit = 10 }) => ({
+        url: `/settings-logs`,
+        method: "GET",
+        params: { page, limit },
+      }),
+      providesTags: ["settingsLogs"],
+    }),
   }),
 });
 
@@ -50,5 +58,6 @@ export const {
   useGetContentsPrivacyPolicyQuery,
   useUpdateContentPrivacyPolicyMutation,
   useGetGeneralSettingsQuery,
-  useUpdateGeneralSettingsMutation
+  useUpdateGeneralSettingsMutation,
+  useGetSettingsLogsQuery,
 } = ContentApi;

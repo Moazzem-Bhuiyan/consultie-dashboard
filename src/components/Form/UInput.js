@@ -5,6 +5,7 @@ import { Controller } from "react-hook-form";
 
 const UInput = ({
   type,
+  rules,
   name,
   label,
   size,
@@ -16,11 +17,13 @@ const UInput = ({
   suffix,
   style,
   max,
+  min,
   required,
 }) => {
   return (
     <Controller
       name={name}
+      rules={rules} // ✅ rules must go here
       render={({ field, fieldState: { error } }) => (
         <Form.Item
           label={
@@ -32,6 +35,7 @@ const UInput = ({
           }
           validateStatus={error ? "error" : ""}
           help={error ? error.message : ""}
+          required={required}
         >
           {type === "password" ? (
             <Input.Password
@@ -41,6 +45,7 @@ const UInput = ({
               size={size}
               placeholder={placeholder}
               className={`h-9 ${className}`}
+              disabled={disabled}
             />
           ) : (
             <Input
@@ -54,6 +59,13 @@ const UInput = ({
               suffix={suffix}
               style={style}
               max={max}
+              min={min}
+              // optional: prevent typing negative numbers for number inputs
+              onKeyDown={(e) => {
+                if (type === "number" && (e.key === "-" || e.key === "e")) {
+                  e.preventDefault();
+                }
+              }}
             />
           )}
         </Form.Item>
