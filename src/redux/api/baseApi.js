@@ -75,6 +75,7 @@ export const baseApi = createApi({
     "withdrawals",
     "PointManagement",
     "ReportedContent",
+    "booking",
   ],
   baseQuery: baseQueryWithRefreshToken,
   endpoints: () => ({}),
